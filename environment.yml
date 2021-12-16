@@ -1,6 +1,6 @@
 name: nmprepr
 dependencies:
-  - python=3.8
+  - python=3.7
   - conda-forge::pinocchio=2.5.2
   - conda-forge::gepetto-viewer-corba=5.5.1
   - conda-forge::pyembree=0.1.6

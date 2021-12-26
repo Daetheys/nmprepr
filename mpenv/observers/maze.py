@@ -14,7 +14,7 @@ class MazeObserver(BaseObserver):
         self.obstacle_point_dim = 4
         # self.visible_cells = 2
         # receptive_field = 2 * self.visible_cells
-        receptive_field = self.env.grid_size
+        receptive_field = 7 # - To be compatible with curriculum learning - #self.env.grid_size
         self.max_edges = 2 * receptive_field * (receptive_field + 1)
         # number of edges at last index
         self.obstacles_dim = self.max_edges * self.obstacle_point_dim + 1

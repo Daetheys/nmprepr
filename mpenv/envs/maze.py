@@ -22,11 +22,12 @@ from mpenv.observers.maze import MazeObserver
 
 
 class MazeGoal(Base):
-    def __init__(self, grid_size):
+    def __init__(self, grid_size,easy):
         super().__init__(robot_name="sphere")
 
         self.thickness = 0.02
         self.grid_size = grid_size
+        self.easy = easy
         self.robot_name = "sphere"
         self.freeflyer_bounds = np.array(
             [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
@@ -68,7 +69,7 @@ class MazeGoal(Base):
             state, goal_state, self.delta_collision_check
         )
         _, collide = self.stopping_configuration(straight_path)
-        return collide.any()
+        return collide.any() or self.easy
 
     def get_obstacles_geoms(self, idx_env):
         np_random = self._np_random

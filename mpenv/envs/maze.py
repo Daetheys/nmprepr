@@ -191,8 +191,8 @@ def extract_obstacles(maze, thickness):
     return obstacles
 
 
-def maze_edges(grid_size):
-    env = MazeGoal(grid_size)
+def maze_edges(grid_size,easy):
+    env = MazeGoal(grid_size,easy)
     env = MazeObserver(env)
     coordinate_frame = "local"
     env = RobotLinksObserver(env, coordinate_frame)

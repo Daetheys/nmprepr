@@ -51,10 +51,11 @@ class MazeGoal(Base):
         model_wrapper.create_data()
 
         valid_sample = False
-        while not valid_sample:
+        while not valid_sample and :
             bfs, depth, depth_max = self.maze.depth_bfs()
             self.state = self.random_configuration()
             self.goal_state = self.random_configuration()
+            print(self.state, type(self.state))
             valid_sample = self.validate_sample(self.state, self.goal_state)
         if start is not None:
             self.set_state(start)

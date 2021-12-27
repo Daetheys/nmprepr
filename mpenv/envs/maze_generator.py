@@ -35,6 +35,9 @@ class Cell:
         self.walls[wall] = False
         other.walls[Cell.wall_pairs[wall]] = False
 
+    def __repr__(self):
+        return f"({self.x}, {self.y})"
+
 
 class Maze:
     """A Maze, represented as a grid of cells."""
@@ -160,6 +163,18 @@ class Maze:
                     neighbours.append((direction, neighbour))
         return neighbours
 
+    def find_neighbours(self, cell):
+        """Return a list of unvisited neighbours to cell."""
+
+        delta = [("W", (-1, 0)), ("E", (1, 0)), ("S", (0, 1)), ("N", (0, -1))]
+        neighbours = []
+        for direction, (dx, dy) in delta:
+            if not cell.walls[direction]:
+                x2, y2 = cell.x + dx, cell.y + dy
+                neighbour = self.cell_at(x2, y2)
+                neighbours.append(neighbour)
+        return neighbours
+
     def make_maze(self):
         # Total number of cells.
         n = self.nx * self.ny
@@ -182,3 +197,55 @@ class Maze:
             cell_stack.append(current_cell)
             current_cell = next_cell
             nv += 1
+
+    def bfs(self, x_0, y_0):
+        BFS = [self.cell_at(x_0, y_0)]
+        i = 0
+        n = self.nx * self.ny
+        visited = [[False] * self.nx for _ in range(self.ny)]
+        visited[y_0][x_0] = True
+        while i < len(BFS):
+            cur_cell = BFS[i]
+            neighbours = self.find_neighbours(cur_cell)
+            neighbours2 = [n for n in neighbours if not visited[n.y][n.x]]
+            BFS = BFS + neighbours2
+            for c in neighbours:
+                visited[c.y][c.x] = True
+            i += 1
+        return BFS
+
+    def depth_bfs(self, x_0, y_0):
+        BFS = [self.cell_at(x_0, y_0)]
+        depth = [0]
+        d_max = 0
+
+        i = 0
+
+        visited = [[False] * self.nx for _ in range(self.ny)]
+        visited[y_0][x_0] = True
+
+        while i < len(BFS):
+            cur_cell = BFS[i]
+            d = depth[i]
+
+            neighbours = self.find_neighbours(cur_cell)
+            neighbours = [n for n in neighbours if not visited[n.y][n.x]]
+
+            BFS = BFS + neighbours
+            depth = depth + [d+1]*len(neighbours)
+
+            for c in neighbours:
+                visited[c.y][c.x] = True
+
+            i += 1
+            d_max = max(d+1*len(neighbours), d_max)
+        return BFS, depth, d_max
+
+if __name__=='__main__':
+    m = Maze(10,10)
+    m.make_maze()
+    print(m)
+    b, d, d_max = m.depth_bfs(5,5)
+    print(b)
+    print(d)
+    print(d_max)

@@ -51,7 +51,7 @@ class MazeGoal(Base):
         model_wrapper.create_data()
 
         valid_sample = False
-        while not valid_sample and :
+        while not valid_sample:
             x0, y0 = np.random.randint(self.grid_size), np.random.randint(self.grid_size)
             bfs, depth, depth_max = self.maze.depth_bfs(x0, y0)
             self.state = self.random_configuration()

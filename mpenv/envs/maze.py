@@ -22,12 +22,12 @@ from mpenv.observers.maze import MazeObserver
 
 
 class MazeGoal(Base):
-    def __init__(self, grid_size,easy):
+    def __init__(self, grid_size, easy=False, grid_jitter=False):
         super().__init__(robot_name="sphere")
 
         self.thickness = 0.02
         self.grid_size = grid_size
-        self.easy = easy
+
         self.robot_name = "sphere"
         self.freeflyer_bounds = np.array(
             [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
@@ -36,6 +36,9 @@ class MazeGoal(Base):
         self.action_space = spaces.Box(
             low=-1, high=1, shape=(self.robot_props["action_dim"],), dtype=np.float32
         )
+
+        self.easy = easy
+        self.grid_jitter = grid_jitter
 
         self.fig, self.ax, self.pos = None, None, None
 
@@ -49,6 +52,7 @@ class MazeGoal(Base):
 
         valid_sample = False
         while not valid_sample:
+            bfs, depth, depth_max = self.maze.depth_bfs()
             self.state = self.random_configuration()
             self.goal_state = self.random_configuration()
             valid_sample = self.validate_sample(self.state, self.goal_state)

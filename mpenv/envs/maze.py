@@ -52,7 +52,8 @@ class MazeGoal(Base):
 
         valid_sample = False
         while not valid_sample and :
-            bfs, depth, depth_max = self.maze.depth_bfs()
+            x0, y0 = np.random.randint(self.grid_size), np.random.randint(self.grid_size)
+            bfs, depth, depth_max = self.maze.depth_bfs(x0, y0)
             self.state = self.random_configuration()
             self.goal_state = self.random_configuration()
             print(self.state, type(self.state))

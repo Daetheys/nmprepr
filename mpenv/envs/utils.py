@@ -1,3 +1,4 @@
+import abc
 import os
 import pickle as pkl
 import numpy as np
@@ -104,3 +105,6 @@ def get_bounds_geom_objs(pos_bounds):
             geom_objs.append(mesh.geom_obj())
             translation *= -1
     return geom_objs
+
+def random(a, b):
+  return np.random.rand()*(b-a)+a

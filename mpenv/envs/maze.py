@@ -1,7 +1,9 @@
+from ast import NodeTransformer
 import os
 import numpy as np
 from gym import spaces
 import hppfcl
+from numpy.lib.function_base import _delete_dispatcher
 import pinocchio as pin
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -9,9 +11,10 @@ import matplotlib.collections as collections
 
 from mpenv.core.mesh import Mesh
 from mpenv.envs.base import Base
+from torch._C import Value
 from mpenv.envs.maze_generator import Maze
 from mpenv.envs import utils as envs_utils
-from mpenv.envs.utils import ROBOTS_PROPS
+from mpenv.envs.utils import ROBOTS_PROPS, random
 from mpenv.core import utils
 from mpenv.core.geometry import Geometries
 
@@ -20,16 +23,20 @@ from mpenv.observers.point_cloud import PointCloudObserver
 from mpenv.observers.ray_tracing import RayTracingObserver
 from mpenv.observers.maze import MazeObserver
 
-from mpenv.envs.cst import SPHERE_2D_DIAMETER
+from mpenv.envs.cst import SPHERE_2D_DIAMETER, SPHERE_2D_RADIUS
 
 class MazeGoal(Base):
-    def __init__(self, grid_size, easy=False, coordinate_jitter=False):
+    def __init__(self, grid_size, easy=False, coordinate_jitter=False, min_gap=3*SPHERE_2D_DIAMETER, depth=None):
         super().__init__(robot_name="sphere")
 
         self.thickness = 0.02
         self.grid_size = grid_size
+
         self.easy = easy
         self.coordinate_jitter = coordinate_jitter
+        self.min_gap = min_gap
+        self.depth = depth
+
         self.robot_name = "sphere"
         self.freeflyer_bounds = np.array(
             [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
@@ -41,19 +48,36 @@ class MazeGoal(Base):
 
         self.fig, self.ax, self.pos = None, None, None
 
+        self.maze = None
+        self.goal_cell = None
+        self.init_cell = None
+
     def _reset(self, idx_env=None, start=None, goal=None):
         model_wrapper = self.model_wrapper
         self.robot = self.add_robot("sphere2d", self.freeflyer_bounds)
-        self.geoms, self.idx_env = self.get_obstacles_geoms(idx_env)
+        self.make_maze()
+        self.geoms, self.idx_env, self.subdiv_x, self.subdiv_y = self.get_obstacles_geoms(idx_env)
         for geom_obj in self.geoms.geom_objs:
             self.add_obstacle(geom_obj, static=True)
         model_wrapper.create_data()
 
         valid_sample = False
-        while not valid_sample:
+        if self.depth is None:
+          while not valid_sample:
             self.state = self.random_configuration()
             self.goal_state = self.random_configuration()
             valid_sample = self.validate_sample(self.state, self.goal_state)
+        else:
+          inside_cells = False
+          while not valid_sample or not inside_cells:
+              q_state = self.get_random_state_cell(self.init_cell)
+              q_goal = self.get_random_state_cell(self.goal_cell)
+              self.set_state(q_state)
+              self.set_goal_state(q_goal)
+              valid_sample = self.validate_sample(self.state, self.goal_state)
+              inside_cells = self.is_in_cell(self.state, self.init_cell) and \
+                            self.is_in_cell(self.goal_state, self.goal_cell)
+              print(inside_cells, valid_sample)
         if start is not None:
             self.set_state(start)
         if goal is not None:
@@ -73,13 +97,46 @@ class MazeGoal(Base):
         _, collide = self.stopping_configuration(straight_path)
         return collide.any() or self.easy
 
-    def get_obstacles_geoms(self, idx_env):
-        np_random = self._np_random
+    
+    def make_maze(self):
         self.maze = Maze(self.grid_size, self.grid_size)
         self.maze.make_maze()
-        geom_objs = extract_obstacles(self.maze, self.thickness, self.coordinate_jitter)
+
+        if self.depth is not None:
+          x0, y0 = np.random.randint(self.maze.nx), np.random.randint(self.maze.ny)
+          bfs, depth_list, d_max = self.maze.depth_bfs(x0,y0)
+          
+          while d_max < self.depth:
+            self.maze = Maze(self.grid_size, self.grid_size)
+            self.maze.make_maze()
+            x0, y0 = np.random.randint(self.maze.nx), np.random.randint(self.maze.ny)
+            bfs, depth_list, d_max = self.maze.depth_bfs(x0,y0)
+
+          depth_list = np.array(depth_list) # to make it easier
+          idx = np.where(depth_list == self.depth)[0]
+          i = np.random.choice(idx)
+          self.goal_cell = bfs[0]
+          self.init_cell = bfs[i]
+
+    def get_obstacles_geoms(self, idx_env):
+        np_random = self._np_random
+        geom_objs, subdiv_x, subdiv_y = extract_obstacles(self.maze, self.thickness, self.coordinate_jitter, self.min_gap)
         geoms = Geometries(geom_objs)
-        return geoms, idx_env
+        return geoms, idx_env, subdiv_x, subdiv_y
+
+    def is_in_cell(self, configuration, cell):
+        x, y = cell.x, cell.y
+        qx, qy = configuration.q[0], configuration.q[1]
+        return self.subdiv_x[x] <= qx <= self.subdiv_x[x+1] and \
+               self.subdiv_y[y] <= qy <= self.subdiv_y[y+1]
+
+    def get_random_state_cell(self, cell):
+      delta = self.thickness + SPHERE_2D_RADIUS + .005
+      q = np.zeros(7)
+      q[-1] = 1.
+      q[0] = random(self.subdiv_x[cell.x] + delta, self.subdiv_x[cell.x+1] - delta)
+      q[1] = random(self.subdiv_y[cell.y] + delta, self.subdiv_y[cell.y+1] - delta)
+      return q
 
     def set_eval(self):
         pass
@@ -94,6 +151,7 @@ class MazeGoal(Base):
             prev_pos = self.pos.get_offsets().data
             new_pos = self.state.q[:2][None, :]
             x = np.vstack((prev_pos, new_pos))
+            self.init_matplotlib()
             self.ax.plot(x[:, 0], x[:, 1], c=(0, 0, 0, 0.5))
             self.pos.set_offsets(new_pos)
         plt.draw()
@@ -146,19 +204,23 @@ def generate_subdivision(nb_gaps, min_gap):
     subdiv = np.random.rand(nb_gaps-1)
     subdiv.sort()
     subdiv = np.hstack(([0.], subdiv, [1.]))
+
     while np.min(np.diff(subdiv)) < min_gap:
       subdiv = np.random.rand(nb_gaps-1)
       subdiv.sort()
       subdiv = np.hstack(([0.], subdiv, [1.]))
     return subdiv
 
-def extract_obstacles(maze, thickness, coordinate_jitter=False):
+def extract_obstacles(maze, thickness, coordinate_jitter=False, min_gap=3*SPHERE_2D_DIAMETER):
     if coordinate_jitter:
-        subdivision_x = generate_subdivision(maze.nx, 3*SPHERE_2D_DIAMETER)
-        subdivision_y = generate_subdivision(maze.ny, 3*SPHERE_2D_DIAMETER)
+        if min_gap > .9 * 1/maze.nx or min_gap > .9 * 1/maze.ny:
+          raise ValueError
+        subdivision_x = generate_subdivision(maze.nx, min_gap)
+        subdivision_y = generate_subdivision(maze.ny, min_gap)
     else:
         scx = 1/maze.nx
         scy = 1/maze.ny
+        subdivision_x, subdivision_y = np.array([i*scx for i in range(maze.nx)]+[1.]), np.array([i*scy for i in range(maze.ny)]+[1.])
 
     obstacles_coord = []
     for x in range(maze.nx):
@@ -171,39 +233,22 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False):
     for x in range(maze.nx):
         for y in range(maze.ny):
             if maze.cell_at(x, y).walls["S"]:
-              if coordinate_jitter:
                 x1, y1, x2, y2 = (
                     subdivision_x[x],
                     subdivision_y[y+1],
                     subdivision_x[x+1],
                     subdivision_y[y+1],
                 )
-              else:
-                x1, y1, x2, y2 = (
-                    (x + 1) * scx,
-                    y * scy,
-                    (x + 1) * scx,
-                    (y + 1) * scy,
-                )
-                
-              obstacles_coord.append((x1, y1, x2, y2))
+                obstacles_coord.append((x1, y1, x2, y2))
             if maze.cell_at(x, y).walls["E"]:
-              if coordinate_jitter:
                 x1, y1, x2, y2 = (
                     subdivision_x[x+1],
                     subdivision_y[y],
                     subdivision_x[x+1],
                     subdivision_y[y+1],
                 )
-              else:
-                x1, y1, x2, y2 = (
-                    (x + 1) * scx,
-                    y * scy,
-                    (x + 1) * scx,
-                    (y + 1) * scy,
-                )
                 
-              obstacles_coord.append((x1, y1, x2, y2))
+                obstacles_coord.append((x1, y1, x2, y2))
     obstacles = []
     for i, obst_coord in enumerate(obstacles_coord):
         x1, y1, x2, y2 = obst_coord[0], obst_coord[1], obst_coord[2], obst_coord[3]
@@ -221,12 +266,11 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False):
             color=(0, 0, 1, 0.8),
         )
         obstacles.append(mesh.geom_obj())
+    return obstacles, subdivision_x, subdivision_y
 
-    return obstacles
 
-
-def maze_edges(grid_size, easy, coordinate_jitter=False):
-    env = MazeGoal(grid_size, easy, coordinate_jitter)
+def maze_edges(grid_size, easy, coordinate_jitter=False, min_gap=3*SPHERE_2D_DIAMETER, depth=None):
+    env = MazeGoal(grid_size, easy, coordinate_jitter, min_gap, depth)
     env = MazeObserver(env)
     coordinate_frame = "local"
     env = RobotLinksObserver(env, coordinate_frame)

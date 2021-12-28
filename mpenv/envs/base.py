@@ -20,6 +20,8 @@ from mpenv.core.mesh import Mesh
 
 from mpenv.robot.freeflyer import FreeFlyer
 
+from mpenv.envs.cst import SPHERE_2D_RADIUS
+
 
 class Base(gym.Env):
     def __init__(self, robot_name):
@@ -84,7 +86,7 @@ class Base(gym.Env):
             sphere_mesh = Mesh(name="robot", geometry=geom, color=color)
             robot = FreeFlyer(model_wrapper, sphere_mesh, bounds)
         elif robot_name == "sphere2d":
-            radius = 0.01
+            radius = SPHERE_2D_RADIUS
             geom = hppfcl.Sphere(radius)
             sphere_mesh = Mesh(name="robot", geometry=geom, color=color)
             robot = FreeFlyer(model_wrapper, sphere_mesh, bounds)

@@ -20,14 +20,16 @@ from mpenv.observers.point_cloud import PointCloudObserver
 from mpenv.observers.ray_tracing import RayTracingObserver
 from mpenv.observers.maze import MazeObserver
 
+from mpenv.envs.cst import SPHERE_2D_DIAMETER
 
 class MazeGoal(Base):
-    def __init__(self, grid_size, easy=False, grid_jitter=False):
+    def __init__(self, grid_size, easy=False, coordinate_jitter=False):
         super().__init__(robot_name="sphere")
 
         self.thickness = 0.02
         self.grid_size = grid_size
-
+        self.easy = easy
+        self.coordinate_jitter = coordinate_jitter
         self.robot_name = "sphere"
         self.freeflyer_bounds = np.array(
             [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
@@ -36,9 +38,6 @@ class MazeGoal(Base):
         self.action_space = spaces.Box(
             low=-1, high=1, shape=(self.robot_props["action_dim"],), dtype=np.float32
         )
-
-        self.easy = easy
-        self.grid_jitter = grid_jitter
 
         self.fig, self.ax, self.pos = None, None, None
 
@@ -52,11 +51,8 @@ class MazeGoal(Base):
 
         valid_sample = False
         while not valid_sample:
-            x0, y0 = np.random.randint(self.grid_size), np.random.randint(self.grid_size)
-            bfs, depth, depth_max = self.maze.depth_bfs(x0, y0)
             self.state = self.random_configuration()
             self.goal_state = self.random_configuration()
-            print(self.state, type(self.state))
             valid_sample = self.validate_sample(self.state, self.goal_state)
         if start is not None:
             self.set_state(start)
@@ -81,7 +77,7 @@ class MazeGoal(Base):
         np_random = self._np_random
         self.maze = Maze(self.grid_size, self.grid_size)
         self.maze.make_maze()
-        geom_objs = extract_obstacles(self.maze, self.thickness)
+        geom_objs = extract_obstacles(self.maze, self.thickness, self.coordinate_jitter)
         geoms = Geometries(geom_objs)
         return geoms, idx_env
 
@@ -146,36 +142,68 @@ class MazeGoal(Base):
         self.ax = ax
 
 
-def extract_obstacles(maze, thickness):
-    scx = 1 / maze.nx
-    scy = 1 / maze.ny
+def generate_subdivision(nb_gaps, min_gap):
+    subdiv = np.random.rand(nb_gaps-1)
+    subdiv.sort()
+    subdiv = np.hstack(([0.], subdiv, [1.]))
+    while np.min(np.diff(subdiv)) < min_gap:
+      subdiv = np.random.rand(nb_gaps-1)
+      subdiv.sort()
+      subdiv = np.hstack(([0.], subdiv, [1.]))
+    return subdiv
+
+def extract_obstacles(maze, thickness, coordinate_jitter=False):
+    if coordinate_jitter:
+        subdivision_x = generate_subdivision(maze.nx, 3*SPHERE_2D_DIAMETER)
+        subdivision_y = generate_subdivision(maze.ny, 3*SPHERE_2D_DIAMETER)
+    else:
+        scx = 1/maze.nx
+        scy = 1/maze.ny
 
     obstacles_coord = []
     for x in range(maze.nx):
-        obstacles_coord.append((x / maze.nx, 0, (x + 1) / maze.nx, 0))
+        obstacles_coord.append((subdivision_x[x], 0, subdivision_x[x+1], 0))
     for y in range(maze.ny):
-        obstacles_coord.append((0, y / maze.ny, 0, (y + 1) / maze.ny))
+        obstacles_coord.append((0, subdivision_y[y], 0, subdivision_y[y+1]))
     # Draw the "South" and "East" walls of each cell, if present (these
     # are the "North" and "West" walls of a neighbouring cell in
     # general, of course).
     for x in range(maze.nx):
         for y in range(maze.ny):
             if maze.cell_at(x, y).walls["S"]:
+              if coordinate_jitter:
                 x1, y1, x2, y2 = (
-                    x * scx,
-                    (y + 1) * scy,
-                    (x + 1) * scx,
-                    (y + 1) * scy,
+                    subdivision_x[x],
+                    subdivision_y[y+1],
+                    subdivision_x[x+1],
+                    subdivision_y[y+1],
                 )
-                obstacles_coord.append((x1, y1, x2, y2))
-            if maze.cell_at(x, y).walls["E"]:
+              else:
                 x1, y1, x2, y2 = (
                     (x + 1) * scx,
                     y * scy,
                     (x + 1) * scx,
                     (y + 1) * scy,
                 )
-                obstacles_coord.append((x1, y1, x2, y2))
+                
+              obstacles_coord.append((x1, y1, x2, y2))
+            if maze.cell_at(x, y).walls["E"]:
+              if coordinate_jitter:
+                x1, y1, x2, y2 = (
+                    subdivision_x[x+1],
+                    subdivision_y[y],
+                    subdivision_x[x+1],
+                    subdivision_y[y+1],
+                )
+              else:
+                x1, y1, x2, y2 = (
+                    (x + 1) * scx,
+                    y * scy,
+                    (x + 1) * scx,
+                    (y + 1) * scy,
+                )
+                
+              obstacles_coord.append((x1, y1, x2, y2))
     obstacles = []
     for i, obst_coord in enumerate(obstacles_coord):
         x1, y1, x2, y2 = obst_coord[0], obst_coord[1], obst_coord[2], obst_coord[3]
@@ -197,8 +225,8 @@ def extract_obstacles(maze, thickness):
     return obstacles
 
 
-def maze_edges(grid_size,easy):
-    env = MazeGoal(grid_size,easy)
+def maze_edges(grid_size, easy, coordinate_jitter=False):
+    env = MazeGoal(grid_size, easy, coordinate_jitter)
     env = MazeObserver(env)
     coordinate_frame = "local"
     env = RobotLinksObserver(env, coordinate_frame)

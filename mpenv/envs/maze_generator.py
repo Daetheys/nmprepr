@@ -238,7 +238,8 @@ class Maze:
                 visited[c.y][c.x] = True
 
             i += 1
-            d_max = max(d+1*len(neighbours), d_max)
+            if len(neighbours) != 0:
+                d_max = max(d+1, d_max)
         return BFS, depth, d_max
 
 if __name__=='__main__':

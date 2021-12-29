@@ -26,7 +26,9 @@ from mpenv.observers.maze import MazeObserver
 from mpenv.envs.cst import SPHERE_2D_DIAMETER, SPHERE_2D_RADIUS
 
 class MazeGoal(Base):
-    def __init__(self, grid_size, easy=False, coordinate_jitter=False, min_gap=3*SPHERE_2D_DIAMETER, depth=None, init_distance=None):
+    def __init__(self, grid_size, easy=False, coordinate_jitter=False,
+                 min_gap=3*SPHERE_2D_DIAMETER, depth=None, init_distance=None,
+                 min_maze_size = None, max_maze_size=None):
         super().__init__(robot_name="sphere")
 
         self.thickness = 0.02
@@ -36,7 +38,9 @@ class MazeGoal(Base):
         self.coordinate_jitter = coordinate_jitter
         self.min_gap = min_gap
         self.distance = init_distance # distance l_infinity from the goal
-        self.depth = depth if self.distance is not None else 0 # depth is 0 if we fix the distance
+        self.depth = depth if self.distance is None else 0 # depth is 0 if we fix the distance
+        self.min_maze_size = min_maze_size
+        self.max_maze_size = max_maze_size
 
         self.robot_name = "sphere"
         self.freeflyer_bounds = np.array(
@@ -56,6 +60,9 @@ class MazeGoal(Base):
     def _reset(self, idx_env=None, start=None, goal=None):
         model_wrapper = self.model_wrapper
         self.robot = self.add_robot("sphere2d", self.freeflyer_bounds)
+        if self.max_maze_size is not None:
+          self.grid_size = np.random.randint(1 if self.min_maze_size is None else self.min_maze_size,
+                                             self.max_maze_size + 1)
         self.make_maze()
         self.geoms, self.idx_env, self.subdiv_x, self.subdiv_y = self.get_obstacles_geoms(idx_env)
         for geom_obj in self.geoms.geom_objs:
@@ -69,7 +76,7 @@ class MazeGoal(Base):
                 self.state = self.random_configuration()
 
                 straight_path = self.is_straight_path(self.state, self.goal_state)
-        elif:
+        else:
             colliding = True
             while colliding:
                 q_goal = self.get_random_state_cell(self.goal_cell)
@@ -78,7 +85,7 @@ class MazeGoal(Base):
                 if self.distance is not None:
                     q_state = self.get_random_state_near_goal(q_goal[:2], self.distance, self.goal_cell)
                 else:
-                    q_state = self.get_random_state_cell(self.state_cell)
+                    q_state = self.get_random_state_cell(self.init_cell)
 
                 self.set_state(q_state)
 
@@ -95,8 +102,8 @@ class MazeGoal(Base):
 
         return self.observation()
 
-    def colliding_somewhere(self):
-        raise self.model_wrapper.collision(self.state) or self.model_wrapper.collision(self.goal_state)
+    def collision_somewhere(self):
+        return self.model_wrapper.collision(self.state.q) or self.model_wrapper.collision(self.goal_state.q)
 
     def is_straight_path(self, state, goal_state):
         "Filter start and goal with straight path solution"
@@ -306,8 +313,11 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False, min_gap=3*SPHERE
     return obstacles, subdivision_x, subdivision_y
 
 
-def maze_edges(grid_size, easy, coordinate_jitter=False, min_gap=3*SPHERE_2D_DIAMETER, depth=None, distance=None):
-    env = MazeGoal(grid_size, easy, coordinate_jitter, min_gap, depth, distance)
+def maze_edges(grid_size, easy, coordinate_jitter=False,
+               min_gap=3*SPHERE_2D_DIAMETER, depth=None, distance=None,
+               min_maze_size=None, max_maze_size=None):
+    env = MazeGoal(grid_size, easy, coordinate_jitter, min_gap, depth, distance,
+                   min_maze_size, max_maze_size)
     env = MazeObserver(env)
     coordinate_frame = "local"
     env = RobotLinksObserver(env, coordinate_frame)

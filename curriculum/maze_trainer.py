@@ -9,7 +9,10 @@ from nmp import settings
 import gtimer
 
 class MazeTrainer:
-    def __init__(self,env_name,exp_dir,seed,resume,mode,archi,epochs,reward_scale,hidden_dim,batch_size,learning_rate,n_layers,soft_target_tau,auto_alpha,alpha,frac_goal_replay,horizon,replay_buffer_size,snapshot_mode,snapshot_gap,cpu,):
+    def __init__(self,env_name, exp_dir, seed,resume, mode, archi, epochs, 
+                 reward_scale, hidden_dim, batch_size, learning_rate, n_layers,
+                 soft_target_tau, auto_alpha, alpha, frac_goal_replay, horizon,
+                 replay_buffer_size, snapshot_mode, snapshot_gap, cpu,):
         machine_log_dir = settings.log_dir()
         exp_dir = os.path.join(machine_log_dir, exp_dir, f"seed{seed}")
         # multi-gpu and batch size scaling

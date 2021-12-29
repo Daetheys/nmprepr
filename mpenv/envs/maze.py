@@ -81,6 +81,7 @@ class MazeGoal(Base):
               inside_cells = self.is_in_cell(self.state, self.init_cell) and \
                             self.is_in_cell(self.goal_state, self.goal_cell)
               right_distance = (self.distance is None) or (np.linalg.norm(q_state[:2] - q_goal[:2]) < self.distance)
+              # print(right_distance, self.distance)
         if start is not None:
             self.set_state(start)
         if goal is not None:
@@ -100,7 +101,7 @@ class MazeGoal(Base):
         _, collide = self.stopping_configuration(straight_path)
         return collide.any() or self.easy
 
-
+    
     def make_maze(self):
         self.maze = Maze(self.grid_size, self.grid_size)
         self.maze.make_maze()
@@ -108,7 +109,7 @@ class MazeGoal(Base):
         if self.depth is not None:
           x0, y0 = np.random.randint(self.maze.nx), np.random.randint(self.maze.ny)
           bfs, depth_list, d_max = self.maze.depth_bfs(x0,y0)
-
+          
           while d_max < self.depth:
             self.maze = Maze(self.grid_size, self.grid_size)
             self.maze.make_maze()
@@ -250,7 +251,7 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False, min_gap=3*SPHERE
                     subdivision_x[x+1],
                     subdivision_y[y+1],
                 )
-
+                
                 obstacles_coord.append((x1, y1, x2, y2))
     obstacles = []
     for i, obst_coord in enumerate(obstacles_coord):

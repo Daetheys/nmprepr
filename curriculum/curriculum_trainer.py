@@ -1,5 +1,8 @@
 import csv
 import sys
+from curriculum.maze_trainer import MazeTrainer
+from torch import cuda
+
 class CurriculumTrainer:
     def __init__(self,mazes,threshold=0.95):
         self.mazes = mazes
@@ -8,8 +11,10 @@ class CurriculumTrainer:
         hidden_size = 256
         nb_layers = 3
         lr = 3e-4
+
+        cpu = not cuda.is_available()
         
-        self.mazetrainer = MazeTrainer(self.mazes[0],'maze_baseline',0,False,"her","pointnet",0,1.,hidden_size,batch_size,lr,nb_layers,5e-3,True,0.1,0.8,75,int(1e6),"last",10,False)
+        self.mazetrainer = MazeTrainer(self.mazes[0],'maze_baseline',0,False,"her","pointnet",0,1.,hidden_size,batch_size,lr,nb_layers,5e-3,True,0.1,0.8,75,int(1e6),"last",10,cpu)
     
         self.threshold = threshold
 

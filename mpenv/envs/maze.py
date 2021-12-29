@@ -35,8 +35,8 @@ class MazeGoal(Base):
         self.easy = easy
         self.coordinate_jitter = coordinate_jitter
         self.min_gap = min_gap
-        self.depth = depth
-        self.distance = init_distance
+        self.distance = init_distance # distance l_infinity from the goal
+        self.depth = depth if self.distance is not None else 0 # depth is 0 if we fix the distance
 
         self.robot_name = "sphere"
         self.freeflyer_bounds = np.array(
@@ -62,26 +62,28 @@ class MazeGoal(Base):
             self.add_obstacle(geom_obj, static=True)
         model_wrapper.create_data()
 
-        valid_sample = False
-        right_distance = self.distance is None
         if self.depth is None:
-          while not valid_sample or not right_distance:
-            self.state = self.random_configuration()
-            self.goal_state = self.random_configuration()
-            valid_sample = self.validate_sample(self.state, self.goal_state)
-            right_distance = (self.distance is None) or (np.linalg.norm(self.state.q[:2] - self.goal_state.q[:2]) < self.distance)
-        else:
-          inside_cells = False
-          while not valid_sample or not inside_cells or not right_distance:
-              q_state = self.get_random_state_cell(self.init_cell)
-              q_goal = self.get_random_state_cell(self.goal_cell)
-              self.set_state(q_state)
-              self.set_goal_state(q_goal)
-              valid_sample = self.validate_sample(self.state, self.goal_state)
-              inside_cells = self.is_in_cell(self.state, self.init_cell) and \
-                            self.is_in_cell(self.goal_state, self.goal_cell)
-              right_distance = (self.distance is None) or (np.linalg.norm(q_state[:2] - q_goal[:2]) < self.distance)
-              # print(right_distance, self.distance)
+            straight_path = True
+            while straight_path:
+                self.goal_state = self.random_configuration()
+                self.state = self.random_configuration()
+
+                straight_path = self.is_straight_path(self.state, self.goal_state)
+        elif:
+            colliding = True
+            while colliding:
+                q_goal = self.get_random_state_cell(self.goal_cell)
+                self.set_goal_state(q_goal)
+
+                if self.distance is not None:
+                    q_state = self.get_random_state_near_goal(q_goal[:2], self.distance, self.goal_cell)
+                else:
+                    q_state = self.get_random_state_cell(self.state_cell)
+
+                self.set_state(q_state)
+
+                colliding = self.collision_somewhere()
+
         if start is not None:
             self.set_state(start)
         if goal is not None:
@@ -93,15 +95,18 @@ class MazeGoal(Base):
 
         return self.observation()
 
-    def validate_sample(self, state, goal_state):
+    def colliding_somewhere(self):
+        raise self.model_wrapper.collision(self.state) or self.model_wrapper.collision(self.goal_state)
+
+    def is_straight_path(self, state, goal_state):
         "Filter start and goal with straight path solution"
         straight_path = self.model_wrapper.arange(
             state, goal_state, self.delta_collision_check
         )
         _, collide = self.stopping_configuration(straight_path)
-        return collide.any() or self.easy
+        return not(collide.any() or self.easy)
 
-    
+
     def make_maze(self):
         self.maze = Maze(self.grid_size, self.grid_size)
         self.maze.make_maze()
@@ -109,7 +114,7 @@ class MazeGoal(Base):
         if self.depth is not None:
           x0, y0 = np.random.randint(self.maze.nx), np.random.randint(self.maze.ny)
           bfs, depth_list, d_max = self.maze.depth_bfs(x0,y0)
-          
+
           while d_max < self.depth:
             self.maze = Maze(self.grid_size, self.grid_size)
             self.maze.make_maze()
@@ -138,9 +143,37 @@ class MazeGoal(Base):
       delta = self.thickness + SPHERE_2D_RADIUS + .005
       q = np.zeros(7)
       q[-1] = 1.
-      q[0] = random(self.subdiv_x[cell.x] + delta, self.subdiv_x[cell.x+1] - delta)
-      q[1] = random(self.subdiv_y[cell.y] + delta, self.subdiv_y[cell.y+1] - delta)
+
+      min_x = self.subdiv_x[cell.x  ] + delta
+      max_x = self.subdiv_x[cell.x+1] - delta
+
+      min_y = self.subdiv_y[cell.y  ] + delta
+      max_y = self.subdiv_y[cell.y+1] - delta
+
+      q[0] = random(min_x, max_x)
+      q[1] = random(min_y, max_y)
       return q
+
+    def get_random_state_near_goal(self, goal_pos, max_distance, goal_cell):
+        goal_x, goal_y = goal_pos[0], goal_pos[1]
+
+        delta = self.thickness + SPHERE_2D_RADIUS + .005
+        q = np.zeros(7)
+        q[-1] = 1.
+
+        min_x = max(self.subdiv_x[goal_cell.x  ] + delta,
+                    goal_x - max_distance)
+        max_x = min(self.subdiv_x[goal_cell.x+1] - delta,
+                    goal_x + max_distance)
+
+        min_y = max(self.subdiv_y[goal_cell.y  ] + delta,
+                    goal_y - max_distance)
+        max_y = min(self.subdiv_y[goal_cell.y+1] - delta,
+                    goal_y + max_distance)
+
+        q[0] = random(min_x, max_x)
+        q[1] = random(min_y, max_y)
+        return q
 
     def set_eval(self):
         pass
@@ -251,7 +284,7 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False, min_gap=3*SPHERE
                     subdivision_x[x+1],
                     subdivision_y[y+1],
                 )
-                
+
                 obstacles_coord.append((x1, y1, x2, y2))
     obstacles = []
     for i, obst_coord in enumerate(obstacles_coord):

@@ -1,7 +1,6 @@
 # df_maze.py
 import random
 
-
 # Create a maze using the depth-first algorithm described at
 # https://scipython.com/blog/making-a-maze/
 # Christian Hill, April 2017.
@@ -42,7 +41,7 @@ class Cell:
 class Maze:
     """A Maze, represented as a grid of cells."""
 
-    def __init__(self, nx, ny, ix=0, iy=0):
+    def __init__(self, nx, ny, i0=None):
         """Initialize the maze grid.
         The maze consists of nx x ny cells and will be constructed starting
         at the cell indexed at (ix, iy).
@@ -50,7 +49,10 @@ class Maze:
         """
 
         self.nx, self.ny = nx, ny
-        self.ix, self.iy = ix, iy
+        if i0 is None:
+          self.ix, self.iy = random.randrange(0, nx), random.randrange(0, ny)
+        else:
+          self.ix, self.iy = i0
         self.maze_map = [[Cell(x, y) for y in range(ny)] for x in range(nx)]
 
     def cell_at(self, x, y):

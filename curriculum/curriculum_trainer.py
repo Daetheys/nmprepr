@@ -30,10 +30,13 @@ class CurriculumTrainer:
             count_next = 0
             while True:
                 out = sys.stdout
-                sys.stdout = open('/dev/null','w')
-                self.mazetrainer.train(1)
-                sys.stdout.close()
-                sys.stdout = out
+                try:
+                    sys.stdout = open('/dev/null','w')
+                    self.mazetrainer.train(1)
+                    sys.stdout.close()
+                    sys.stdout = out
+                except:
+                    sys.stdout = out
                 #Get score
                 with open('/root/maze_baseline/seed0/progress.csv', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)

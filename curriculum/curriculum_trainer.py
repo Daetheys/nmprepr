@@ -13,9 +13,9 @@ class CurriculumTrainer:
         lr = 3e-4
 
         cpu = not cuda.is_available()
-        
+
         self.mazetrainer = MazeTrainer(self.mazes[0],'maze_baseline',0,False,"her","pointnet",0,1.,hidden_size,batch_size,lr,nb_layers,5e-3,True,0.1,0.8,75,int(1e6),"last",10,cpu)
-    
+
         self.threshold = threshold
 
         self.count_next_threshold = 3
@@ -41,7 +41,7 @@ class CurriculumTrainer:
                     for row in reader:
                         l.append(row['evaluation/SuccessRate'])
                     score = eval(l[-1])[0]
-                print(c,score)
+                print(c,"{:.2f}%".format(100 *score))
                 c += 1
                 if score >= self.threshold:
                     count_next += 1

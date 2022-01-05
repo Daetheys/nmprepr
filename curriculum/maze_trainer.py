@@ -9,7 +9,7 @@ from nmp import settings
 import gtimer
 
 class MazeTrainer:
-    def __init__(self,env_name, exp_dir, seed,resume, mode, archi, epochs, 
+    def __init__(self,env_name, exp_dir, seed,resume, mode, archi, epochs,
                  reward_scale, hidden_dim, batch_size, learning_rate, n_layers,
                  soft_target_tau, auto_alpha, alpha, frac_goal_replay, horizon,
                  replay_buffer_size, snapshot_mode, snapshot_gap, cpu,):
@@ -125,7 +125,8 @@ class MazeTrainer:
 
         self.trainer.env = self.eval_env
 
-        self.replay_buffer.env = self.expl_env
+        # self.replay_buffer.env = self.expl_env
+        self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
 
 
     def train(self,nb_epochs):

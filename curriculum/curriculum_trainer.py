@@ -4,13 +4,14 @@ from curriculum.maze_trainer import MazeTrainer
 from torch import cuda
 
 class CurriculumTrainer:
-    def __init__(self,mazes,threshold=0.95):
+    def __init__(self,
+                 mazes,
+                 batch_size=128,
+                 hidden_dim=256,
+                 nb_layers=12,
+                 lr=3e-4,
+                 threshold=0.90):
         self.mazes = mazes
-
-        batch_size = 256
-        hidden_size = 256
-        nb_layers = 3
-        lr = 3e-4
 
         cpu = not cuda.is_available()
 
@@ -24,7 +25,7 @@ class CurriculumTrainer:
                     reward_scale=1.,
                     hidden_dim=hidden_size,
                     batch_size=batch_size,
-                    learning_rate=batch_size,
+                    learning_rate=lr,
                     n_layers=nb_layers,
                     soft_target_tau=5e-3,
                     auto_alpha=True,

@@ -14,7 +14,30 @@ class CurriculumTrainer:
 
         cpu = not cuda.is_available()
 
-        self.mazetrainer = MazeTrainer(self.mazes[0],'maze_baseline',0,False,"her","pointnet",0,1.,hidden_size,batch_size,lr,nb_layers,5e-3,True,0.1,0.8,75,int(1e6),"last",10,cpu)
+        arguments = dict(env_name=self.mazes[0],
+                    exp_dir='maze_baseline',
+                    seed=0,
+                    resume=False,
+                    mode="her",
+                    archi="pointnet",
+                    epochs=0,
+                    reward_scale=1.,
+                    hidden_dim=hidden_size,
+                    batch_size=batch_size,
+                    learning_rate=batch_size,
+                    n_layers=nb_layers,
+                    soft_target_tau=5e-3,
+                    auto_alpha=True,
+                    alpha=0.1,
+                    frac_goal_replay=0.8,
+                    horizon=75,
+                    replay_buffer_size=int(1e6),
+                    snapshot_mode="last",
+                    snapshot_gap=10,
+                    cpu=cpu
+                    )
+
+        self.mazetrainer = MazeTrainer(**args)
 
         self.threshold = threshold
 

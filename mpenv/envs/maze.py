@@ -313,7 +313,7 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False, min_gap=3*SPHERE
     return obstacles, subdivision_x, subdivision_y
 
 
-def maze_edges(grid_size, easy, coordinate_jitter=False,
+def maze_edges(grid_size, easy=True, coordinate_jitter=False,
                min_gap=3*SPHERE_2D_DIAMETER, depth=None, distance=None,
                min_maze_size=None, max_maze_size=None):
     env = MazeGoal(grid_size, easy, coordinate_jitter, min_gap, depth, distance,

@@ -200,7 +200,7 @@ class MazeGoal(Base):
             self.pos.set_offsets(new_pos)
         # plt.draw()
         # plt.pause(0.01)
-
+        self.fig.canvas.draw()
         data = np.frombuffer(self.fig.canvas.tostring_rgb(), dtype=np.uint8)
         size = int(np.sqrt(data.size // 3))
         data = data.reshape((size, size, 3))

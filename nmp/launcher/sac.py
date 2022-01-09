@@ -49,12 +49,19 @@ def get_networks(variant, expl_env):
     policy_class, policy_kwargs = utils.get_policy_network(
         variant["archi"], policy_kwargs, expl_env, "tanhgaussian"
     )
-
-    qf1 = qf_class(**qf_kwargs)
-    qf2 = qf_class(**qf_kwargs)
-    target_qf1 = qf_class(**qf_kwargs)
-    target_qf2 = qf_class(**qf_kwargs)
-    policy = policy_class(**policy_kwargs)
+    if variant['resume']:
+        p = torch.load(variant['resume_file'])
+        qf1 = p['trainer/qf1']
+        qf2 = p['trainer/qf2']
+        target_qf1 = p['trainer/target_qf1']
+        target_qf2 = p['trainer/target_qf2']
+        policy = p['trainer/policy']
+    else:
+        qf1 = qf_class(**qf_kwargs)
+        qf2 = qf_class(**qf_kwargs)
+        target_qf1 = qf_class(**qf_kwargs)
+        target_qf2 = qf_class(**qf_kwargs)
+        policy = policy_class(**policy_kwargs)
     print("Policy:")
     print(policy)
 

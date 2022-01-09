@@ -98,12 +98,12 @@ class CurriculumTrainer:
                 # save some paths
                 if self.n_viz_path is not None:
                     for i in range(self.n_viz_path):
-                        o = env.reset()
+                        o = visualization_env.reset()
                         done = False
                         path_max=75
                         for i in range(path_max):
                             a = policy.get_action(o['observation'],deterministic=True)
-                            o,r,d,_ = env.step(copy.deepcopy(a[0]))
+                            o,r,d,_ = visualization_env.step(copy.deepcopy(a[0]))
 
                 if score >= self.threshold:
                     count_next += 1

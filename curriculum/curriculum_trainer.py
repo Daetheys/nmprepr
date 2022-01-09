@@ -60,6 +60,8 @@ class CurriculumTrainer:
 
         self.count_next_threshold = count_next_threshold
 
+        self.n_viz_path = n_viz_path
+
     def train(self):
         for m in self.mazes:
             print('----------------------------')
@@ -69,7 +71,7 @@ class CurriculumTrainer:
             c = 0
             count_next = 0
 
-            if n_viz_path is not None:
+            if self.n_viz_path is not None:
                 visualization_env = gym.make(m)
                 visualization_env = Recorder(visualization_env, '/content/videos/'+m)
 
@@ -94,8 +96,8 @@ class CurriculumTrainer:
                 c += 1
 
                 # save some paths
-                if n_viz_path is not None:
-                    for i in range(n_viz_path):
+                if self.n_viz_path is not None:
+                    for i in range(self.n_viz_path):
                         o = env.reset()
                         done = False
                         path_max=75

@@ -107,10 +107,11 @@ class CurriculumTrainer:
                         o = visualization_env.reset()
                         done = False
                         path_max=75
-                        for i in range(path_max):
+                        while not done and i < path_max:
                             a = self.mazetrainer.trainer._base_trainer.policy.get_action(np.hstack((o['observation'], o['representation_goal'])),deterministic=True)
                             o,r,d,_ = visualization_env.step(copy.deepcopy(a[0]))
-
+                            i += 1
+                    print('Videos saved')
                 if score >= self.threshold:
                     count_next += 1
                     if count_next >= self.count_next_threshold:

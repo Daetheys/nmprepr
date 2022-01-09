@@ -19,7 +19,7 @@ class MazeTrainer:
         replay_buffer_size = replay_buffer_size
         num_expl_steps_per_train_loop = 500
         num_eval_steps_per_epoch = 500
-        min_num_steps_before_training = 500
+        min_num_steps_before_training = 10000
         num_trains_per_train_loop = 500
         # learning rate and soft update linear scaling
         policy_lr = learning_rate

@@ -59,8 +59,9 @@ class CurriculumTrainer:
                     self.mazetrainer.train(1)
                     sys.stdout.close()
                     sys.stdout = out
-                except:
+                except e:
                     sys.stdout = out
+                    raise e
                 #Get score
                 with open('/root/maze_baseline/seed0/progress.csv', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)

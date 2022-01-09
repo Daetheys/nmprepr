@@ -202,7 +202,8 @@ class MazeGoal(Base):
         plt.pause(0.01)
 
         data = np.frombuffer (self.fig.canvas.tostring_rgb(), dtype=np.uint8 )
-        data = data.reshape(self.fig.canvas.get_width_height()[::-1] + (3,))
+        size = int(np.sqrt(data.size // 3))
+        data = data.reshape((size, size, 3))
 
         return data
 

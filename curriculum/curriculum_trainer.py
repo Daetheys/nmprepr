@@ -2,6 +2,9 @@ import csv
 import sys
 from curriculum.maze_trainer import MazeTrainer
 from torch import cuda
+from colabgymrender.recorder import Recorder
+import gym
+import copy
 
 class CurriculumTrainer:
     def __init__(self,
@@ -18,6 +21,7 @@ class CurriculumTrainer:
                  num_trains_per_train_loop=500,
                  replay_buffer_size=int(1e6),
                  frac_goal_replay=0.8,
+                 n_viz_path=20
                  ):
         self.mazes = mazes
 
@@ -64,6 +68,10 @@ class CurriculumTrainer:
             self.mazetrainer.change_env(m)
             c = 0
             count_next = 0
+
+            visualization_env = gym.make(m)
+            visualization_env = Recorder(visualization_env, '/content/videos/'+m)
+
             while True:
                 out = sys.stdout
                 try:
@@ -71,9 +79,9 @@ class CurriculumTrainer:
                     self.mazetrainer.train(1)
                     sys.stdout.close()
                     sys.stdout = out
-                except e:
+                except:
                     sys.stdout = out
-                    raise e
+                    raise
                 #Get score
                 with open('/root/maze_baseline/seed0/progress.csv', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)
@@ -83,6 +91,16 @@ class CurriculumTrainer:
                     score = eval(l[-1])[0]
                 print(c,"{:.2f}%".format(100 *score))
                 c += 1
+
+                # save some paths
+                for i in range(n_viz_path):
+                    o = env.reset()
+                    done = False
+                    path_max=75
+                    for i in range(path_max):
+                        a = policy.get_action(o['observation'],deterministic=True)
+                        o,r,d,_ = env.step(copy.deepcopy(a[0]))
+
                 if score >= self.threshold:
                     count_next += 1
                     if count_next >= self.count_next_threshold:

@@ -15,7 +15,9 @@ class CurriculumTrainer:
                  num_expl_steps_per_train_loop=3333,
                  num_eval_steps_per_epoch = 500,
                  min_num_steps_before_training=10000,
-                 num_trains_per_train_loop=500
+                 num_trains_per_train_loop=500,
+                 replay_buffer_size=int(1e6),
+                 frac_goal_replay=0.8,
                  ):
         self.mazes = mazes
 
@@ -36,9 +38,9 @@ class CurriculumTrainer:
                     soft_target_tau=5e-3,
                     auto_alpha=True,
                     alpha=0.1,
-                    frac_goal_replay=0.8,
+                    frac_goal_replay=frac_goal_replay,
                     horizon=75,
-                    replay_buffer_size=int(1e6),
+                    replay_buffer_size=replay_buffer_size,
                     snapshot_mode="last",
                     snapshot_gap=10,
                     cpu=cpu,

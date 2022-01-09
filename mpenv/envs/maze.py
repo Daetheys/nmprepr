@@ -202,7 +202,7 @@ class MazeGoal(Base):
         plt.pause(0.01)
 
         # Get the RGBA buffer from the figure
-        w,h = fig.canvas.get_width_height()
+        w,h = self.fig.canvas.get_width_height()
         buf = np.fromstring ( fig.canvas.tostring_argb(), dtype=np.uint8 )
         buf.shape = (w, h, 4)
 

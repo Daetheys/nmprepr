@@ -62,7 +62,7 @@ class CurriculumTrainer:
         self.count_next_threshold = count_next_threshold
 
         self.n_viz_path = n_viz_path
-        
+
     def load(self,file):
         self.args['resume'] = file
         self.mazetrainer = MazeTrainer(**self.args)
@@ -106,7 +106,7 @@ class CurriculumTrainer:
                         done = False
                         path_max=75
                         for i in range(path_max):
-                            a = self.mazetrainer.trainer._base_trainer.policy.get_action(o['observation'],deterministic=True)
+                            a = self.mazetrainer.trainer._base_trainer.policy.get_action(o,deterministic=True)
                             o,r,d,_ = visualization_env.step(copy.deepcopy(a[0]))
 
                 if score >= self.threshold:

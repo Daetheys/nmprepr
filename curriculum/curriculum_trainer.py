@@ -6,6 +6,7 @@ from colabgymrender.recorder import Recorder
 import gym
 import copy
 import os
+import numpy as np
 
 class HideOut:
     def __enter__(self,*args,**kwargs):

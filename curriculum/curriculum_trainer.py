@@ -28,7 +28,7 @@ class CurriculumTrainer:
 
         cpu = not cuda.is_available()
 
-        args = dict(env_name=self.mazes[0],
+        self.args = dict(env_name=self.mazes[0],
                     exp_dir='maze_baseline',
                     seed=0,
                     resume=False,
@@ -55,13 +55,17 @@ class CurriculumTrainer:
                     num_trains_per_train_loop=num_trains_per_train_loop
                     )
 
-        self.mazetrainer = MazeTrainer(**args)
+        self.mazetrainer = MazeTrainer(**self.args)
 
         self.threshold = threshold
 
         self.count_next_threshold = count_next_threshold
 
         self.n_viz_path = n_viz_path
+        
+    def load(self,file):
+        self.args['resume'] = file
+        self.mazetrainer = MazeTrainer(**self.args)
 
     def train(self):
         for m in self.mazes:

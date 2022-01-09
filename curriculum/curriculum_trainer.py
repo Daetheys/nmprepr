@@ -10,7 +10,8 @@ class CurriculumTrainer:
                  hidden_dim=256,
                  nb_layers=12,
                  lr=3e-4,
-                 threshold=0.90):
+                 threshold=0.90,
+                 count_next_threshold=1):
         self.mazes = mazes
 
         cpu = not cuda.is_available()
@@ -42,7 +43,7 @@ class CurriculumTrainer:
 
         self.threshold = threshold
 
-        self.count_next_threshold = 3
+        self.count_next_threshold = count_next_threshold
 
     def train(self):
         for m in self.mazes:

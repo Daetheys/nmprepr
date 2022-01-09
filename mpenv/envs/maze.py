@@ -198,10 +198,10 @@ class MazeGoal(Base):
             self.init_matplotlib()
             self.ax.plot(x[:, 0], x[:, 1], c=(0, 0, 0, 0.5))
             self.pos.set_offsets(new_pos)
-        plt.draw()
-        plt.pause(0.01)
+        # plt.draw()
+        # plt.pause(0.01)
 
-        data = np.frombuffer (self.fig.canvas.tostring_rgb(), dtype=np.uint8 )
+        data = np.frombuffer(self.fig.canvas.tostring_rgb(), dtype=np.uint8)
         size = int(np.sqrt(data.size // 3))
         data = data.reshape((size, size, 3))
 

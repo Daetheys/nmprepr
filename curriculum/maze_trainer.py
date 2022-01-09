@@ -19,11 +19,11 @@ class MazeTrainer:
         machine_log_dir = settings.log_dir()
         exp_dir = os.path.join(machine_log_dir, exp_dir, f"seed{seed}")
         # multi-gpu and batch size scaling
-        replay_buffer_size = replay_buffer_size
-        num_expl_steps_per_train_loop = 3333
-        num_eval_steps_per_epoch = 500
-        min_num_steps_before_training = 10000
-        num_trains_per_train_loop = 500
+        # replay_buffer_size = replay_buffer_size
+        # num_expl_steps_per_train_loop = 3333
+        # num_eval_steps_per_epoch = 500
+        # min_num_steps_before_training = 10000
+        # num_trains_per_train_loop = 500
         # learning rate and soft update linear scaling
         policy_lr = learning_rate
         qf_lr = learning_rate
@@ -128,8 +128,8 @@ class MazeTrainer:
 
         self.trainer.env = self.eval_env
 
-        self.replay_buffer.env = self.expl_env
-        # self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
+        # self.replay_buffer.env = self.expl_env
+        self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
 
 
     def train(self,nb_epochs):

@@ -15,7 +15,7 @@ class CurriculumTrainer:
 
         cpu = not cuda.is_available()
 
-        arguments = dict(env_name=self.mazes[0],
+        args = dict(env_name=self.mazes[0],
                     exp_dir='maze_baseline',
                     seed=0,
                     resume=False,
@@ -23,7 +23,7 @@ class CurriculumTrainer:
                     archi="pointnet",
                     epochs=0,
                     reward_scale=1.,
-                    hidden_dim=hidden_size,
+                    hidden_dim=hidden_dim,
                     batch_size=batch_size,
                     learning_rate=lr,
                     n_layers=nb_layers,

@@ -50,7 +50,7 @@ def get_networks(variant, expl_env):
         variant["archi"], policy_kwargs, expl_env, "tanhgaussian"
     )
     if variant['resume']:
-        p = torch.load(variant['resume_file'])
+        p = torch.load(variant['resume'])
         qf1 = p['trainer/qf1']
         qf2 = p['trainer/qf2']
         target_qf1 = p['trainer/target_qf1']

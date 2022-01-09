@@ -21,7 +21,7 @@ class CurriculumTrainer:
                  num_trains_per_train_loop=500,
                  replay_buffer_size=int(1e6),
                  frac_goal_replay=0.8,
-                 n_viz_path=20
+                 n_viz_path=None
                  ):
         self.mazes = mazes
 
@@ -69,8 +69,9 @@ class CurriculumTrainer:
             c = 0
             count_next = 0
 
-            visualization_env = gym.make(m)
-            visualization_env = Recorder(visualization_env, '/content/videos/'+m)
+            if n_viz_path is not None:
+                visualization_env = gym.make(m)
+                visualization_env = Recorder(visualization_env, '/content/videos/'+m)
 
             while True:
                 out = sys.stdout
@@ -93,13 +94,14 @@ class CurriculumTrainer:
                 c += 1
 
                 # save some paths
-                for i in range(n_viz_path):
-                    o = env.reset()
-                    done = False
-                    path_max=75
-                    for i in range(path_max):
-                        a = policy.get_action(o['observation'],deterministic=True)
-                        o,r,d,_ = env.step(copy.deepcopy(a[0]))
+                if n_viz_path is not None:
+                    for i in range(n_viz_path):
+                        o = env.reset()
+                        done = False
+                        path_max=75
+                        for i in range(path_max):
+                            a = policy.get_action(o['observation'],deterministic=True)
+                            o,r,d,_ = env.step(copy.deepcopy(a[0]))
 
                 if score >= self.threshold:
                     count_next += 1

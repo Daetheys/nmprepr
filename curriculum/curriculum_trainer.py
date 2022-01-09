@@ -11,7 +11,12 @@ class CurriculumTrainer:
                  nb_layers=12,
                  lr=3e-4,
                  threshold=0.90,
-                 count_next_threshold=1):
+                 count_next_threshold=1,
+                 num_expl_steps_per_train_loop=3333,
+                 num_eval_steps_per_epoch = 500,
+                 min_num_steps_before_training=10000,
+                 num_trains_per_train_loop=500
+                 ):
         self.mazes = mazes
 
         cpu = not cuda.is_available()
@@ -36,7 +41,11 @@ class CurriculumTrainer:
                     replay_buffer_size=int(1e6),
                     snapshot_mode="last",
                     snapshot_gap=10,
-                    cpu=cpu
+                    cpu=cpu,
+                    num_expl_steps_per_train_loop=num_expl_steps_per_train_loop,
+                    num_eval_steps_per_epoch=num_eval_steps_per_epoch,
+                    min_num_steps_before_training=min_num_steps_before_training,
+                    num_trains_per_train_loop=num_trains_per_train_loop
                     )
 
         self.mazetrainer = MazeTrainer(**args)

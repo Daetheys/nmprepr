@@ -12,12 +12,15 @@ class MazeTrainer:
     def __init__(self,env_name, exp_dir, seed,resume, mode, archi, epochs,
                  reward_scale, hidden_dim, batch_size, learning_rate, n_layers,
                  soft_target_tau, auto_alpha, alpha, frac_goal_replay, horizon,
-                 replay_buffer_size, snapshot_mode, snapshot_gap, cpu,):
+                 replay_buffer_size, snapshot_mode, snapshot_gap, cpu,
+                 num_expl_steps_per_train_loop, num_eval_steps_per_epoch,
+                 min_num_steps_before_training, num_trains_per_train_loop
+                 ):
         machine_log_dir = settings.log_dir()
         exp_dir = os.path.join(machine_log_dir, exp_dir, f"seed{seed}")
         # multi-gpu and batch size scaling
         replay_buffer_size = replay_buffer_size
-        num_expl_steps_per_train_loop = 500
+        num_expl_steps_per_train_loop = 3333
         num_eval_steps_per_epoch = 500
         min_num_steps_before_training = 10000
         num_trains_per_train_loop = 500

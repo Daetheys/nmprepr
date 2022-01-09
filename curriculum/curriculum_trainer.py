@@ -5,6 +5,7 @@ from torch import cuda
 from colabgymrender.recorder import Recorder
 import gym
 import copy
+import os
 
 class CurriculumTrainer:
     def __init__(self,
@@ -72,6 +73,7 @@ class CurriculumTrainer:
             count_next = 0
 
             if self.n_viz_path is not None:
+                os.mkdir('/content/videos')
                 visualization_env = gym.make(m)
                 visualization_env = Recorder(visualization_env, '/content/videos/'+m, fps=30)
 

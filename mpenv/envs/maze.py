@@ -203,7 +203,7 @@ class MazeGoal(Base):
 
         # Get the RGBA buffer from the figure
         w,h = self.fig.canvas.get_width_height()
-        buf = np.fromstring ( fig.canvas.tostring_argb(), dtype=np.uint8 )
+        buf = np.fromstring ( self.fig.canvas.tostring_argb(), dtype=np.uint8 )
         buf.shape = (w, h, 4)
 
         # canvas.tostring_argb give pixmap in ARGB mode. Roll the ALPHA channel to have it in RGBA mode

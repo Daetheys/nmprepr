@@ -73,7 +73,7 @@ class CurriculumTrainer:
 
             if self.n_viz_path is not None:
                 visualization_env = gym.make(m)
-                visualization_env = Recorder(visualization_env, '/content/videos/'+m)
+                visualization_env = Recorder(visualization_env, '/content/videos/'+m, self.fps=30)
 
             while True:
                 out = sys.stdout

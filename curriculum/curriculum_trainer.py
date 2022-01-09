@@ -102,7 +102,7 @@ class CurriculumTrainer:
                         done = False
                         path_max=75
                         for i in range(path_max):
-                            a = self.mazetrainer.trainer.policy.get_action(o['observation'],deterministic=True)
+                            a = self.mazetrainer.trainer._base_trainer.policy.get_action(o['observation'],deterministic=True)
                             o,r,d,_ = visualization_env.step(copy.deepcopy(a[0]))
 
                 if score >= self.threshold:

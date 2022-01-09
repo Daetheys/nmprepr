@@ -94,7 +94,7 @@ class CurriculumTrainer:
 
                 # save some paths
                 if self.n_viz_path is not None:
-                    os.makedirs('/content/videos/'+m)
+                    os.makedirs('/content/videos/'+m, exists_ok=True)
                     visualization_env = gym.make(m)
                     visualization_env = Recorder(visualization_env, '/content/videos/'+m+f'/epoch_{c}', fps=30)
                     for i in range(self.n_viz_path):

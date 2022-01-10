@@ -99,7 +99,7 @@ class CurriculumTrainer:
                     reader = csv.DictReader(csvfile)
                     l = []
                     for row in reader:
-                        if alpha:
+                        if self.alpha:
                             l.append(row['evaluation/path length Min'])
                         else:
                             l.append(row['evaluation/SuccessRate'])

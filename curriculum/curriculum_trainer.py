@@ -34,6 +34,7 @@ class CurriculumTrainer:
                  frac_goal_replay=0.8,
                  n_viz_path=None,
                  filename=None
+                 alpha=0.1
                  ):
         self.mazes = mazes
 
@@ -52,8 +53,8 @@ class CurriculumTrainer:
                     learning_rate=lr,
                     n_layers=nb_layers,
                     soft_target_tau=5e-3,
-                    auto_alpha=True,
-                    alpha=0.1,
+                    auto_alpha=alpha is None,
+                    alpha=0.1 if alpha is None else alpha,
                     frac_goal_replay=frac_goal_replay,
                     horizon=75,
                     replay_buffer_size=replay_buffer_size,

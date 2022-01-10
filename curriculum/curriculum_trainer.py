@@ -88,6 +88,7 @@ class CurriculumTrainer:
 
             while True:
                 with HideOut():
+                    self.mazetrainer.set_dir(m, c + 1)
                     self.mazetrainer.train(1)
                 #Get score
                 with open('/root/maze_baseline/seed0/progress.csv', newline='') as csvfile:

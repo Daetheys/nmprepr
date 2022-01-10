@@ -17,7 +17,9 @@ class MazeTrainer:
                  min_num_steps_before_training, num_trains_per_train_loop
                  ):
         machine_log_dir = settings.log_dir()
+        self.base_dir = exp_dir
         exp_dir = os.path.join(machine_log_dir, exp_dir, f"seed{seed}")
+
         # multi-gpu and batch size scaling
         # replay_buffer_size = replay_buffer_size
         # num_expl_steps_per_train_loop = 3333
@@ -131,6 +133,16 @@ class MazeTrainer:
         # self.replay_buffer.env = self.expl_env
         self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
 
+    def set_dir(self, m, epoch):
+        exp_dir = os.path.join(machine_log_dir, self.base_dir, m, f"epoch_{epoch}", f"seed{seed}")
+        setup_logger_kwargs = {
+            "exp_prefix": exp_dir,
+            "variant": self.variant,
+            "log_dir": exp_dir,
+            "snapshot_mode": snapshot_mode,
+            "snapshot_gap": snapshot_gap,
+        }
+        setup_logger(**setup_logger_kwargs)
 
     def train(self,nb_epochs):
         gtimer.reset_root()

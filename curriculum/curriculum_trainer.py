@@ -7,6 +7,7 @@ import gym
 import copy
 import os
 import numpy as np
+import gc
 
 class HideOut:
     def __enter__(self,*args,**kwargs):
@@ -112,6 +113,8 @@ class CurriculumTrainer:
                             o,r,d,_ = visualization_env.step(copy.deepcopy(a[0]))
                             i += 1
                     print('Videos saved')
+                    del visualization_env
+                    gc.collect()
                 if score >= self.threshold:
                     count_next += 1
                     if count_next >= self.count_next_threshold:

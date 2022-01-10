@@ -99,7 +99,7 @@ class CurriculumTrainer:
                     for row in reader:
                         l.append(row['evaluation/SuccessRate'])
                     score = eval(l[-1])
-                print(c,"{:.2f}%".format(100 *score))
+                print(c,"{:.2f}%".format(score))
                 c += 1
 
                 # save some paths

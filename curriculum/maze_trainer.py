@@ -71,14 +71,14 @@ class MazeTrainer:
             )
         set_seed(seed)
 
-        setup_logger_kwargs = {
+        self.setup_logger_kwargs = {
             "exp_prefix": exp_dir,
             "variant": self.variant,
             "log_dir": exp_dir,
             "snapshot_mode": snapshot_mode,
             "snapshot_gap": snapshot_gap,
         }
-        setup_logger(**setup_logger_kwargs)
+        setup_logger(**self.setup_logger_kwargs)
         ptu.set_gpu_mode(not cpu, distributed_mode=False)
         print(f"Start training...")
 
@@ -137,13 +137,8 @@ class MazeTrainer:
         machine_log_dir = settings.log_dir()
         exp_dir = os.path.join(machine_log_dir, self.base_dir, m, f"epoch_{epoch}", f"seed{self.variant['seed']}")
         print(f'Directory is {exp_dir}')
-        setup_logger_kwargs = {
-            "exp_prefix": exp_dir,
-            "variant": self.variant,
-            "log_dir": exp_dir,
-            "snapshot_mode": snapshot_mode,
-            "snapshot_gap": snapshot_gap,
-        }
+        self.setup_logger_kwargs['exp_dir'] = exp_dir
+        self.setup_logger_kwargs['log_dir'] = exp_dir
         setup_logger(**setup_logger_kwargs)
 
     def train(self,nb_epochs):

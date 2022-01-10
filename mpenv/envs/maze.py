@@ -213,6 +213,10 @@ class MazeGoal(Base):
     def init_matplotlib(self):
         plt.ion()
 
+        if self.fig is not None:
+            fig.clf()
+            plt.close()
+
         fig = plt.figure(figsize=(6, 6))
         ax = fig.add_subplot(111, aspect="equal")
         ax.set_xlim(0.0 - self.thickness, 1.0 + self.thickness)

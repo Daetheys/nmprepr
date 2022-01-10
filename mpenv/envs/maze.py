@@ -80,6 +80,7 @@ class MazeGoal(Base):
             colliding = True
             straight_path = True
             condition = colliding or straight_path
+            i = 0
             while condition:
                 q_goal = self.get_random_state_cell(self.goal_cell)
                 self.set_goal_state(q_goal)
@@ -92,7 +93,9 @@ class MazeGoal(Base):
                 self.set_state(q_state)
 
                 condition = self.collision_somewhere() or self.is_straight_path(self.state, self.goal_state)
-
+                i += 1
+                if i % 100 == 0:
+                    return self.render()
         if start is not None:
             self.set_state(start)
         if goal is not None:

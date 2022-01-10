@@ -56,7 +56,7 @@ class CurriculumTrainer:
                     auto_alpha=alpha is None,
                     alpha=0.1 if alpha is None else alpha,
                     frac_goal_replay=frac_goal_replay,
-                    horizon=75,
+                    horizon=150,
                     replay_buffer_size=replay_buffer_size,
                     snapshot_mode="last",
                     snapshot_gap=10,
@@ -97,6 +97,7 @@ class CurriculumTrainer:
                     reader = csv.DictReader(csvfile)
                     l = []
                     for row in reader:
+                        print(row)
                         l.append(row['evaluation/SuccessRate'])
                     score = eval(l[-1])
                 print(c,"{:.2f}%".format(score))
@@ -111,10 +112,11 @@ class CurriculumTrainer:
                         o = visualization_env.reset()
                         done = False
                         path_max=75
-                        while not done and i < path_max:
+                        j = 0
+                        while not done and j < path_max:
                             a = self.mazetrainer.trainer._base_trainer.policy.get_action(np.hstack((o['observation'], o['representation_goal'])),deterministic=True)
                             o,r,d,_ = visualization_env.step(copy.deepcopy(a[0]))
-                            i += 1
+                            j += 1
                     print('Videos saved')
                     visualization_env.close()
                     del visualization_env

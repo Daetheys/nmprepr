@@ -79,7 +79,7 @@ class MazeGoal(Base):
         else:
             colliding = True
             straight_path = True
-            while colliding and straight_path:
+            while colliding or straight_path:
                 q_goal = self.get_random_state_cell(self.goal_cell)
                 self.set_goal_state(q_goal)
 
@@ -208,9 +208,6 @@ class MazeGoal(Base):
         data = data.reshape((size, size, 3))
 
         return data
-
-
-
 
     def init_matplotlib(self):
         plt.ion()

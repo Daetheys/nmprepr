@@ -139,7 +139,7 @@ class MazeTrainer:
         print(f'Directory is {exp_dir}')
         self.setup_logger_kwargs['exp_dir'] = exp_dir
         self.setup_logger_kwargs['log_dir'] = exp_dir
-        setup_logger(**setup_logger_kwargs)
+        setup_logger(**self.setup_logger_kwargs)
 
     def train(self,nb_epochs):
         gtimer.reset_root()

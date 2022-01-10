@@ -135,7 +135,7 @@ class MazeTrainer:
 
     def set_dir(self, m, epoch):
         machine_log_dir = settings.log_dir()
-        exp_dir = os.path.join(machine_log_dir, self.base_dir, m, f"epoch_{epoch}", f"seed{seed}")
+        exp_dir = os.path.join(machine_log_dir, self.base_dir, m, f"epoch_{epoch}", f"seed{self.variant['seed']}")
         print(f'Directory is {exp_dir}')
         setup_logger_kwargs = {
             "exp_prefix": exp_dir,

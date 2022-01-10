@@ -95,6 +95,7 @@ class MazeGoal(Base):
                 condition = self.collision_somewhere() or self.is_straight_path(self.state, self.goal_state)
                 i += 1
                 if i % 25 == 0:
+                    print('!!!')
                     return self.observation()
         if start is not None:
             self.set_state(start)

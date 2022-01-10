@@ -33,6 +33,7 @@ class CurriculumTrainer:
                  replay_buffer_size=int(1e6),
                  frac_goal_replay=0.8,
                  n_viz_path=None
+                 filename=None
                  ):
         self.mazes = mazes
 
@@ -41,7 +42,7 @@ class CurriculumTrainer:
         self.args = dict(env_name=self.mazes[0],
                     exp_dir='maze_baseline',
                     seed=0,
-                    resume=False,
+                    resume=False if filename is None else filename,
                     mode="her",
                     archi="pointnet",
                     epochs=0,
@@ -114,6 +115,7 @@ class CurriculumTrainer:
                             o,r,d,_ = visualization_env.step(copy.deepcopy(a[0]))
                             i += 1
                     print('Videos saved')
+                    visualization_env.close()
                     del visualization_env
                     gc.collect()
                 if score >= self.threshold:

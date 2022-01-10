@@ -79,7 +79,8 @@ class MazeGoal(Base):
         else:
             colliding = True
             straight_path = True
-            while colliding or straight_path:
+            condition = colliding or straight_path
+            while condition:
                 q_goal = self.get_random_state_cell(self.goal_cell)
                 self.set_goal_state(q_goal)
 
@@ -90,8 +91,7 @@ class MazeGoal(Base):
 
                 self.set_state(q_state)
 
-                colliding = self.collision_somewhere()
-                straight_path = self.is_straight_path(self.state, self.goal_state)
+                condition = self.collision_somewhere() or self.is_straight_path(self.state, self.goal_state)
 
         if start is not None:
             self.set_state(start)
@@ -109,11 +109,13 @@ class MazeGoal(Base):
 
     def is_straight_path(self, state, goal_state):
         "Filter start and goal with straight path solution"
+        if self.easy:
+            return False
         straight_path = self.model_wrapper.arange(
             state, goal_state, self.delta_collision_check
         )
         _, collide = self.stopping_configuration(straight_path)
-        return not(collide.any() or self.easy)
+        return not(collide.any())
 
 
     def make_maze(self):

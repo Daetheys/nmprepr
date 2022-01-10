@@ -130,8 +130,8 @@ class MazeTrainer:
 
         self.trainer.env = self.eval_env
 
-        # self.replay_buffer.env = self.expl_env
-        self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
+        self.replay_buffer.env = self.expl_env
+        # self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
 
     def set_dir(self, m, epoch):
         machine_log_dir = settings.log_dir()

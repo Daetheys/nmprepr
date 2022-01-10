@@ -29,8 +29,8 @@ class CNN(nn.Module):
         self.conv_sizes = conv_sizes
         self.output_size = output_size
         self.input_indices = input_indices
-        self.config_dim = robot_props["config_dim"]
-        self.goal_dim = robot_props["goal_rep_dim"]
+        self.config_dim = robot_props[coordinate_frame]["config_dim"]
+        self.goal_dim = robot_props[coordinate_frame]["goal_rep_dim"]
         self.q_action_dim = q_action_dim
         self.coordinate_frame = coordinate_frame
 

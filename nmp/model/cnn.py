@@ -88,6 +88,7 @@ class CNN(nn.Module):
         obstacles = x[:, self.input_indices["obstacles"]]
         # assume the image is always a square
         im_size = np.sqrt(obstacles.size(1)).astype(int)
+        print(obstacles)
         obstacles = obstacles.reshape(-1, 1, im_size, im_size)
 
         if action is None:

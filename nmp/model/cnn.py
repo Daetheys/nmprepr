@@ -102,6 +102,8 @@ class CNN(nn.Module):
         obstacles, links, goal, action = self.process_input(*input)
 
         h_obst = obstacles
+        print(h_obst.shape)
+        print(h_obst.tolist())
         for elem in self.cnn:
             h_obst = elem(h_obst)
 

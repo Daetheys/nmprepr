@@ -32,7 +32,7 @@ class CurriculumTrainer:
                  num_trains_per_train_loop=500,
                  replay_buffer_size=int(1e6),
                  frac_goal_replay=0.8,
-                 n_viz_path=None
+                 n_viz_path=None,
                  filename=None
                  ):
         self.mazes = mazes

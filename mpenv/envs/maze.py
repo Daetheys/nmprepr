@@ -214,7 +214,7 @@ class MazeGoal(Base):
         plt.ion()
 
         if self.fig is not None:
-            fig.clf()
+            self.fig.clf()
             plt.close()
 
         fig = plt.figure(figsize=(6, 6))

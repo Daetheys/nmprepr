@@ -34,9 +34,11 @@ class CurriculumTrainer:
                  frac_goal_replay=0.8,
                  n_viz_path=None,
                  filename=None,
-                 alpha=0.1
+                 alpha=None
                  ):
         self.mazes = mazes
+
+        self.alpha=alpha
 
         cpu = not cuda.is_available()
 
@@ -97,10 +99,12 @@ class CurriculumTrainer:
                     reader = csv.DictReader(csvfile)
                     l = []
                     for row in reader:
-                        print(row)
-                        l.append(row['evaluation/SuccessRate'])
-                    score = eval(l[-1])
-                print(c,"{:.2f}%".format(score))
+                        if alpha:
+                            l.append(row['evaluation/path length Min'])
+                        else:
+                            l.append(row['evaluation/SuccessRate'])
+                    score = eval(l[-1])[0]
+                print(c,"{:.2f}%".format(100 * score))
                 c += 1
 
                 # save some paths

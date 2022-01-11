@@ -33,8 +33,9 @@ class CurriculumTrainer:
                  replay_buffer_size=int(1e6),
                  frac_goal_replay=0.8,
                  n_viz_path=None,
-                 filename=None,
-                 alpha=None
+                 filename_net=None,
+                 alpha=None,
+                 reward_scale=1.
                  ):
         self.mazes = mazes
 
@@ -42,14 +43,16 @@ class CurriculumTrainer:
 
         cpu = not cuda.is_available()
 
+        self.exp_dir = 'maze_baseline'
+
         self.args = dict(env_name=self.mazes[0],
                     exp_dir='maze_baseline',
                     seed=0,
-                    resume=False if filename is None else filename,
+                    resume=False if filename_net is None else filename_net,
                     mode="her",
                     archi="pointnet",
                     epochs=0,
-                    reward_scale=1.,
+                    reward_scale=reward_scale,
                     hidden_dim=hidden_dim,
                     batch_size=batch_size,
                     learning_rate=lr,
@@ -81,6 +84,9 @@ class CurriculumTrainer:
         self.args['resume'] = file
         self.mazetrainer = MazeTrainer(**self.args)
 
+    def save_replay_buffer(self):
+        pickle(self.mazetrainer.replay_buffer, '/root/' + self.exp_dir + '/replay_buffer')
+
     def train(self):
         for m in self.mazes:
             print('----------------------------')
@@ -94,9 +100,11 @@ class CurriculumTrainer:
                 with HideOut():
                     self.mazetrainer.set_dir(m, c + 1)
                     self.mazetrainer.train(1)
+                    self.mazetrainer.save_replay_buffer()
                 #Get score
                 with open('/root/maze_baseline/seed0/progress.csv', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)
+
                     l = []
                     for row in reader:
                         if self.alpha:

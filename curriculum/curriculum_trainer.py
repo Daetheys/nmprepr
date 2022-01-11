@@ -36,7 +36,8 @@ class CurriculumTrainer:
                  filename_net=None,
                  alpha=None,
                  reward_scale=1.,
-                 replay_buffer_file = None
+                 load_replay_buffer_file = None,
+                 save_replay= True
                  ):
         self.mazes = mazes
 
@@ -71,7 +72,7 @@ class CurriculumTrainer:
                     num_eval_steps_per_epoch=num_eval_steps_per_epoch,
                     min_num_steps_before_training=min_num_steps_before_training,
                     num_trains_per_train_loop=num_trains_per_train_loop,
-                    replay_buffer_file=replay_buffer_file
+                    replay_buffer_file=load_replay_buffer_file
                     )
 
         self.mazetrainer = MazeTrainer(**self.args)
@@ -79,6 +80,8 @@ class CurriculumTrainer:
         self.threshold = threshold
 
         self.count_next_threshold = count_next_threshold
+        
+        self.save_replay = save_replay
 
         self.n_viz_path = n_viz_path
 
@@ -102,7 +105,8 @@ class CurriculumTrainer:
                 with HideOut():
                     self.mazetrainer.set_dir(m, c + 1)
                     self.mazetrainer.train(1)
-                    self.mazetrainer.save_replay_buffer()
+                    if self.save_replay:
+                        self.save_replay_buffer()
                 #Get score
                 with open('/root/maze_baseline/seed0/progress.csv', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)

@@ -36,6 +36,7 @@ class CurriculumTrainer:
                  filename_net=None,
                  alpha=None,
                  reward_scale=1.
+                 replay_buffer_file = None
                  ):
         self.mazes = mazes
 
@@ -70,6 +71,7 @@ class CurriculumTrainer:
                     num_eval_steps_per_epoch=num_eval_steps_per_epoch,
                     min_num_steps_before_training=min_num_steps_before_training,
                     num_trains_per_train_loop=num_trains_per_train_loop
+                    replay_buffer_file=replay_buffer_file
                     )
 
         self.mazetrainer = MazeTrainer(**self.args)
@@ -80,7 +82,7 @@ class CurriculumTrainer:
 
         self.n_viz_path = n_viz_path
 
-    def load(self,file):
+    def load(self, file):
         self.args['resume'] = file
         self.mazetrainer = MazeTrainer(**self.args)
 

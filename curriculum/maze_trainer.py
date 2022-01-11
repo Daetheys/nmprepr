@@ -1,5 +1,6 @@
 import os
 import click
+import pickle
 
 import rlkit.torch.pytorch_util as ptu
 from rlkit.launchers.launcher_util import set_seed, setup_logger
@@ -14,7 +15,8 @@ class MazeTrainer:
                  soft_target_tau, auto_alpha, alpha, frac_goal_replay, horizon,
                  replay_buffer_size, snapshot_mode, snapshot_gap, cpu,
                  num_expl_steps_per_train_loop, num_eval_steps_per_epoch,
-                 min_num_steps_before_training, num_trains_per_train_loop
+                 min_num_steps_before_training, num_trains_per_train_loop,
+                 replay_buffer_file
                  ):
         machine_log_dir = settings.log_dir()
         self.base_dir = exp_dir
@@ -97,7 +99,12 @@ class MazeTrainer:
                 representation_goal_key="representation_goal",
             )
 
-        self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
+        if replay_buffer_file:
+            with open(replay_buffer_file, 'rb') as f1:
+                self.replay_buffer = pickle.load(f1)
+                self.replay_buffer.env = self.expl_env
+        else:
+            self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
         qf1, qf2, target_qf1, target_qf2, policy, shared_base = get_networks(self.variant,self.expl_env)
         expl_policy = policy
         eval_policy = MakeDeterministic(policy)
@@ -132,6 +139,13 @@ class MazeTrainer:
 
         self.replay_buffer.env = self.expl_env
         # self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
+
+    def save_replay_buffer(self, filename):
+        with open(filename, 'wb') as f1:
+            tmp = self.replay_buffer.env
+            self.replay_buffer.env = None
+            pickle.dump(self.replay_buffer, f1)
+            self.replay_buffer.env = tmp
 
     def set_dir(self, m, epoch):
         machine_log_dir = settings.log_dir()

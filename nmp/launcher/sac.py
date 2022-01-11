@@ -33,6 +33,7 @@ def get_replay_buffer(variant, expl_env):
         replay_buffer = ObsDictRelabelingBuffer(
             env=expl_env, **variant["her"], **variant["replay_buffer_kwargs"]
         )
+        replay_buffer._env_infos_keys = list(replay_buffer._env_infos_keys)
 
     return replay_buffer
 

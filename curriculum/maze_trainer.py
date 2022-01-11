@@ -9,7 +9,7 @@ from nmp.launcher.sac import *
 from nmp import settings
 import gtimer
 
-from curriculum.utils import SaveReplayBufferEnvs
+from curriculum.utils import SaveReplayBufferEnv
 
 class MazeTrainer:
     def __init__(self,env_name, exp_dir, seed,resume, mode, archi, epochs,

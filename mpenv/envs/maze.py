@@ -28,7 +28,7 @@ from mpenv.envs.cst import SPHERE_2D_DIAMETER, SPHERE_2D_RADIUS
 class MazeGoal(Base):
     def __init__(self, grid_size, easy=False, coordinate_jitter=False,
                  min_gap=3*SPHERE_2D_DIAMETER, depth=None, init_distance=None,
-                 min_maze_size = None, max_maze_size=None):
+                 min_maze_size = None, max_maze_size=None,collision_reward=-4):
         super().__init__(robot_name="sphere")
 
         self.thickness = 0.02
@@ -41,6 +41,8 @@ class MazeGoal(Base):
         self.depth = depth if self.distance is None else 0 # depth is 0 if we fix the distance
         self.min_maze_size = min_maze_size
         self.max_maze_size = max_maze_size
+        
+        self.reward_dict['collision'] = collision_reward
 
         self.robot_name = "sphere"
         self.freeflyer_bounds = np.array(

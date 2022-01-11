@@ -334,9 +334,9 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False, min_gap=3*SPHERE
 
 def maze_edges(grid_size, easy=True, coordinate_jitter=False,
                min_gap=3*SPHERE_2D_DIAMETER, depth=None, distance=None,
-               min_maze_size=None, max_maze_size=None):
+               min_maze_size=None, max_maze_size=None,collision_reward=-4):
     env = MazeGoal(grid_size, easy, coordinate_jitter, min_gap, depth, distance,
-                   min_maze_size, max_maze_size)
+                   min_maze_size, max_maze_size,collision_reward=collision_reward)
     env = MazeObserver(env)
     coordinate_frame = "local"
     env = RobotLinksObserver(env, coordinate_frame)

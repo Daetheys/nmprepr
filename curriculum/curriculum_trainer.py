@@ -35,7 +35,7 @@ class CurriculumTrainer:
                  n_viz_path=None,
                  filename_net=None,
                  alpha=None,
-                 reward_scale=1.
+                 reward_scale=1.,
                  replay_buffer_file = None
                  ):
         self.mazes = mazes

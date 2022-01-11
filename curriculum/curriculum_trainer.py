@@ -112,10 +112,7 @@ class CurriculumTrainer:
 
                     l = []
                     for row in reader:
-                        if self.alpha:
-                            l.append(row['evaluation/path length Min'])
-                        else:
-                            l.append(row['evaluation/SuccessRate'])
+                        l.append(row['evaluation/SuccessRate'])
                     score = eval(l[-1])[0]
                 print(c,"{:.2f}%".format(100 * score))
                 c += 1

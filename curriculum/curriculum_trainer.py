@@ -70,7 +70,7 @@ class CurriculumTrainer:
                     num_expl_steps_per_train_loop=num_expl_steps_per_train_loop,
                     num_eval_steps_per_epoch=num_eval_steps_per_epoch,
                     min_num_steps_before_training=min_num_steps_before_training,
-                    num_trains_per_train_loop=num_trains_per_train_loop
+                    num_trains_per_train_loop=num_trains_per_train_loop,
                     replay_buffer_file=replay_buffer_file
                     )
 

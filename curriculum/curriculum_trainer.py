@@ -1,14 +1,17 @@
 import csv
 import sys
-from curriculum.maze_trainer import MazeTrainer
-from torch import cuda
-from colabgymrender.recorder import Recorder
-import gym
-import copy
 import os
-import numpy as np
+import copy
 import gc
-from pickle import pickle
+import pickle
+
+from torch import cuda
+import numpy as np
+from colabgymrender.recorder import Recorder
+from curriculum.maze_trainer import MazeTrainer
+import gym
+
+from utils import SaveReplayBufferEnvs
 
 class HideOut:
     def __enter__(self,*args,**kwargs):
@@ -91,7 +94,9 @@ class CurriculumTrainer:
         self.mazetrainer = MazeTrainer(**self.args)
 
     def save_replay_buffer(self):
-        pickle(self.mazetrainer.replay_buffer, '/root/' + self.exp_dir + '/replay_buffer')
+        with SaveReplayBufferEnvs(self.replay_buffer):
+            with open('/root/' + self.exp_dir + '/replay_buffer', 'wb') as f:
+                self.mazetrainer.replay_buffer = pickle.load('/root/' + self.exp_dir + '/replay_buffer')
 
     def train(self):
         for m in self.mazes:
@@ -107,7 +112,7 @@ class CurriculumTrainer:
                     self.mazetrainer.set_dir(m, c + 1)
                     self.mazetrainer.train(1)
                     if self.save_replay:
-                        self.save_replay_buffer()
+                        self.mazetrainer.save_replay_buffer()
                 #Get score
                 with open('/root/maze_baseline/seed0/progress.csv', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)

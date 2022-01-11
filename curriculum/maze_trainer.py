@@ -9,6 +9,8 @@ from nmp.launcher.sac import *
 from nmp import settings
 import gtimer
 
+from utils import SaveReplayBufferEnvs
+
 class MazeTrainer:
     def __init__(self,env_name, exp_dir, seed,resume, mode, archi, epochs,
                  reward_scale, hidden_dim, batch_size, learning_rate, n_layers,
@@ -105,6 +107,7 @@ class MazeTrainer:
                 self.replay_buffer.env = self.expl_env
         else:
             self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
+
         qf1, qf2, target_qf1, target_qf2, policy, shared_base = get_networks(self.variant,self.expl_env)
         expl_policy = policy
         eval_policy = MakeDeterministic(policy)
@@ -140,12 +143,10 @@ class MazeTrainer:
         self.replay_buffer.env = self.expl_env
         # self.replay_buffer = get_replay_buffer(self.variant, self.expl_env)
 
-    def save_replay_buffer(self, filename):
-        with open(filename, 'wb') as f1:
-            tmp = self.replay_buffer.env
-            self.replay_buffer.env = None
-            pickle.dump(self.replay_buffer, f1)
-            self.replay_buffer.env = tmp
+    def save_replay_buffer(self):
+        with SaveReplayBufferEnvs(self.replay_buffer):
+            with open('/root/' + self.exp_dir + '/replay_buffer', 'wb') as f1:
+                pickle.dump(self.replay_buffer, f1)
 
     def set_dir(self, m, epoch):
         machine_log_dir = settings.log_dir()

@@ -145,7 +145,7 @@ class MazeTrainer:
 
     def save_replay_buffer(self):
         with SaveReplayBufferEnv(self.replay_buffer):
-            with open('/root/' + self.exp_dir + '/replay_buffer', 'wb') as f1:
+            with open('/root/' + self.base_dir + '/replay_buffer', 'wb') as f1:
                 pickle.dump(self.replay_buffer, f1)
 
     def set_dir(self, m, epoch):

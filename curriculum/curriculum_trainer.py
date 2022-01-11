@@ -11,8 +11,6 @@ from colabgymrender.recorder import Recorder
 from curriculum.maze_trainer import MazeTrainer
 import gym
 
-from curriculum.utils import SaveReplayBufferEnv
-
 class HideOut:
     def __enter__(self,*args,**kwargs):
         self.out = sys.stdout

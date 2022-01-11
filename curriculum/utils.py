@@ -12,9 +12,12 @@ def remove_all_nmprepr_gym_envs():
 
 
 class SaveReplayBufferEnv:
-    def __enter__(self, replay_buffer):
-        self.env = replay_buffer.env
-        replay_buffer.env = None
+    def __init__(self, replay_buffer):
+        self.replay_buffer = replay_buffer
 
-    def __exit__(self, replay_buffer):
-        replay_buffer.env = self.env
+    def __enter__(self):
+        self.env = self.replay_buffer.env
+        self.replay_buffer.env = None
+
+    def __exit__(self):
+        self.replay_buffer.env = self.env

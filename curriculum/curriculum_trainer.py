@@ -11,7 +11,7 @@ from colabgymrender.recorder import Recorder
 from curriculum.maze_trainer import MazeTrainer
 import gym
 
-from utils import SaveReplayBufferEnvs
+from curriculum.utils import SaveReplayBufferEnvs
 
 class HideOut:
     def __enter__(self,*args,**kwargs):
@@ -92,11 +92,6 @@ class CurriculumTrainer:
     def load(self, file):
         self.args['resume'] = file
         self.mazetrainer = MazeTrainer(**self.args)
-
-    def save_replay_buffer(self):
-        with SaveReplayBufferEnvs(self.replay_buffer):
-            with open('/root/' + self.exp_dir + '/replay_buffer', 'wb') as f:
-                self.mazetrainer.replay_buffer = pickle.load('/root/' + self.exp_dir + '/replay_buffer')
 
     def train(self):
         for m in self.mazes:

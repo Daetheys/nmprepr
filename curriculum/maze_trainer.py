@@ -155,9 +155,8 @@ class MazeTrainer:
         self.setup_logger_kwargs['exp_dir'] = exp_dir
         self.setup_logger_kwargs['log_dir'] = exp_dir
         setup_logger(**self.setup_logger_kwargs)
-
-    def train(self,nb_epochs):
-        gtimer.reset_root()
+        
+    def load_algorithm(self,nb_epochs):
         self.variant["algorithm_kwargs"]["num_epochs"] = nb_epochs
         self.algorithm = TorchBatchRLAlgorithm(
             trainer=self.trainer,
@@ -168,6 +167,10 @@ class MazeTrainer:
             replay_buffer=self.replay_buffer,
             **self.variant["algorithm_kwargs"],
         )
-
         self.algorithm.to(ptu.device)
+
+    def train(self,nb_epochs):
+        gtimer.reset_root()
+        self.load_algorithm(nb_epochs)
+        
         self.algorithm.train()

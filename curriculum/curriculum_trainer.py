@@ -8,6 +8,7 @@ import copy
 import os
 import numpy as np
 import gc
+from pickle import pickle
 
 class HideOut:
     def __enter__(self,*args,**kwargs):
@@ -80,7 +81,7 @@ class CurriculumTrainer:
         self.threshold = threshold
 
         self.count_next_threshold = count_next_threshold
-        
+
         self.save_replay = save_replay
 
         self.n_viz_path = n_viz_path

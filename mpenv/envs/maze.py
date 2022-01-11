@@ -42,7 +42,7 @@ class MazeGoal(Base):
         self.min_maze_size = min_maze_size
         self.max_maze_size = max_maze_size
         
-        self.reward_dict['collision'] = collision_reward
+        self.dict_reward['collision'] = collision_reward
 
         self.robot_name = "sphere"
         self.freeflyer_bounds = np.array(

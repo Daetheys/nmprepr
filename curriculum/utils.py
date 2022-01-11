@@ -15,9 +15,9 @@ class SaveReplayBufferEnv:
     def __init__(self, replay_buffer):
         self.replay_buffer = replay_buffer
 
-    def __enter__(self):
+    def __enter__(self, *args, **kwargs):
         self.env = self.replay_buffer.env
         self.replay_buffer.env = None
 
-    def __exit__(self):
+    def __exit__(self, *args, **kwargs):
         self.replay_buffer.env = self.env

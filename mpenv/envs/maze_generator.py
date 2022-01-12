@@ -40,6 +40,7 @@ class Cell:
 
 class Maze:
     """A Maze, represented as a grid of cells."""
+    wall_pairs = {"N": "S", "S": "N", "E": "W", "W": "E"}
 
     def __init__(self, nx, ny, i0=None):
         """Initialize the maze grid.
@@ -170,12 +171,14 @@ class Maze:
 
         delta = [("W", (-1, 0)), ("E", (1, 0)), ("S", (0, 1)), ("N", (0, -1))]
         neighbours = []
+        gates = []
         for direction, (dx, dy) in delta:
             if not cell.walls[direction]:
                 x2, y2 = cell.x + dx, cell.y + dy
                 neighbour = self.cell_at(x2, y2)
                 neighbours.append(neighbour)
-        return neighbours
+                gates.append(Maze.wall_pairs[direction])
+        return neighbours, gates
 
     def make_maze(self):
         # Total number of cells.
@@ -219,6 +222,7 @@ class Maze:
     def depth_bfs(self, x_0, y_0):
         BFS = [self.cell_at(x_0, y_0)]
         depth = [0]
+        gates = [None]
         d_max = 0
 
         i = 0
@@ -230,19 +234,22 @@ class Maze:
             cur_cell = BFS[i]
             d = depth[i]
 
-            neighbours = self.find_neighbours(cur_cell)
-            neighbours = [n for n in neighbours if not visited[n.y][n.x]]
+            neighbours, neighbours_gates = self.find_neighbours(cur_cell)
+            neighbours2 = [n for n in neighbours if not visited[n.y][n.x]]
+            neighbours_gates = [neighbours_gates[i] for i in range(len(neighbours))
+                                                    if not visited[neighbours[i].y][neighbours[i].x]]
 
-            BFS = BFS + neighbours
-            depth = depth + [d+1]*len(neighbours)
+            BFS = BFS + neighbours2
+            gates = gates + neighbours_gates
+            depth = depth + [d+1]*len(neighbours2)
 
-            for c in neighbours:
+            for c in neighbours2:
                 visited[c.y][c.x] = True
 
             i += 1
-            if len(neighbours) != 0:
+            if len(neighbours2) != 0:
                 d_max = max(d+1, d_max)
-        return BFS, depth, d_max
+        return BFS, depth, d_max, gates
 
 if __name__=='__main__':
     m = Maze(10,10)

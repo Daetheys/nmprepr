@@ -41,7 +41,7 @@ class MazeGoal(Base):
         self.depth = depth if self.distance is None else 0 # depth is 0 if we fix the distance
         self.min_maze_size = min_maze_size
         self.max_maze_size = max_maze_size
-        
+
         self.dict_reward['collision'] = collision_reward
 
         self.robot_name = "sphere"
@@ -58,6 +58,7 @@ class MazeGoal(Base):
         self.maze = None
         self.goal_cell = None
         self.init_cell = None
+        self.gate = None
 
     def _reset(self, idx_env=None, start=None, goal=None):
         model_wrapper = self.model_wrapper
@@ -65,7 +66,7 @@ class MazeGoal(Base):
         if self.max_maze_size is not None:
           self.grid_size = np.random.randint(1 if self.min_maze_size is None else self.min_maze_size,
                                              self.max_maze_size + 1)
-        self.make_maze()
+        self.maze, self.goal_cell, self.init_cell, self.gate = self.make_maze()
         self.geoms, self.idx_env, self.subdiv_x, self.subdiv_y = self.get_obstacles_geoms(idx_env)
         for geom_obj in self.geoms.geom_objs:
             self.add_obstacle(geom_obj, static=True)
@@ -88,7 +89,7 @@ class MazeGoal(Base):
                 self.set_goal_state(q_goal)
 
                 if self.distance is not None:
-                    q_state = self.get_random_state_near_goal(q_goal[:2], self.distance, self.goal_cell)
+                    q_state = self.get_random_state_near_goal(q_goal[:2], self.distance, self.goal_cell, self.gate)
                 else:
                     q_state = self.get_random_state_cell(self.init_cell)
 
@@ -122,30 +123,33 @@ class MazeGoal(Base):
         _, collide = self.stopping_configuration(straight_path)
         return not(collide.any())
 
-
     def make_maze(self):
-        self.maze = Maze(self.grid_size, self.grid_size)
-        self.maze.make_maze()
+        maze = Maze(self.grid_size, self.grid_size)
+        maze.make_maze()
 
         if self.depth is not None:
-          x0, y0 = np.random.randint(self.maze.nx), np.random.randint(self.maze.ny)
-          bfs, depth_list, d_max = self.maze.depth_bfs(x0,y0)
+          x0, y0 = np.random.randint(maze.nx), np.random.randint(maze.ny)
+          bfs, depth_list, d_max, gates = maze.depth_bfs(x0,y0)
 
           while d_max < self.depth:
-            self.maze = Maze(self.grid_size, self.grid_size)
-            self.maze.make_maze()
-            x0, y0 = np.random.randint(self.maze.nx), np.random.randint(self.maze.ny)
-            bfs, depth_list, d_max = self.maze.depth_bfs(x0,y0)
+            maze = Maze(self.grid_size, self.grid_size)
+            maze.make_maze()
+            x0, y0 = np.random.randint(maze.nx), np.random.randint(maze.ny)
+            bfs, depth_list, d_max, gates = maze.depth_bfs(x0,y0)
 
           depth_list = np.array(depth_list) # to make it easier
           idx = np.where(depth_list == self.depth)[0]
           i = np.random.choice(idx)
-          self.goal_cell = bfs[0]
-          self.init_cell = bfs[i]
+
+          goal_cell = bfs[0]
+          init_cell = bfs[i]
+          gate = gates[i]
+
+          return maze, goal_cell, init_cell, gate
 
     def get_obstacles_geoms(self, idx_env):
         np_random = self._np_random
-        geom_objs, subdiv_x, subdiv_y = extract_obstacles(self.maze, self.thickness, self.coordinate_jitter, self.min_gap)
+        geom_objs, subdiv_x, subdiv_y = extract_obstacles(maze, self.thickness, self.coordinate_jitter, self.min_gap)
         geoms = Geometries(geom_objs)
         return geoms, idx_env, subdiv_x, subdiv_y
 
@@ -170,22 +174,44 @@ class MazeGoal(Base):
       q[1] = random(min_y, max_y)
       return q
 
-    def get_random_state_near_goal(self, goal_pos, max_distance, goal_cell):
+    def get_random_state_near_goal(self, goal_pos, max_distance, goal_cell, gate):
         goal_x, goal_y = goal_pos[0], goal_pos[1]
 
         delta = self.thickness + SPHERE_2D_RADIUS + .005
         q = np.zeros(7)
         q[-1] = 1.
 
-        min_x = max(self.subdiv_x[goal_cell.x  ] + delta,
-                    goal_x - max_distance)
-        max_x = min(self.subdiv_x[goal_cell.x+1] - delta,
-                    goal_x + max_distance)
+        if gate == 'N':
+            min_x = self.subdiv_x[cell.x  ] + delta
+            max_x = self.subdiv_x[cell.x+1] - delta
 
-        min_y = max(self.subdiv_y[goal_cell.y  ] + delta,
-                    goal_y - max_distance)
-        max_y = min(self.subdiv_y[goal_cell.y+1] - delta,
-                    goal_y + max_distance)
+            min_y = self.subdiv_y[cell.y  ] + delta
+            max_y = min(self.subdiv_y[cell.y+1] - delta,
+                        self.subdiv_y[cell.y  ] + delta + distance)
+        elif gate == 'S':
+            min_x = self.subdiv_x[cell.x  ] + delta
+            max_x = self.subdiv_x[cell.x+1] - delta
+
+            min_y = max(self.subdiv_y[cell.y  ] + delta,
+                        self.subdiv_y[cell.y+1] - delta - distance)
+            max_y = self.subdiv_y[cell.y+1] - delta
+        elif gate == 'W':
+            min_x = self.subdiv_x[cell.x  ] + delta
+            max_x = min(self.subdiv_x[cell.x+1] - delta,
+                        self.subdiv_x[cell.x  ] + delta + distance)
+
+            min_y = self.subdiv_y[cell.y  ] + delta,
+            max_y = self.subdiv_y[cell.y+1] - delta
+        elif gate == 'E':
+            min_x = max(self.subdiv_x[cell.x  ] + delta,
+                        self.subdiv_x[cell.x+1] - delta - distance)
+            max_x = self.subdiv_x[cell.x+1] - delta
+
+            min_y = self.subdiv_y[cell.y  ] + delta,
+            max_y = self.subdiv_y[cell.y+1] - delta
+        else:
+            raise ValueError('No gates when depth is 0')
+
 
         q[0] = random(min_x, max_x)
         q[1] = random(min_y, max_y)
@@ -217,8 +243,6 @@ class MazeGoal(Base):
         return data
 
     def init_matplotlib(self):
-        plt.ion()
-
         if self.fig is not None:
             self.fig.clf()
             plt.close()

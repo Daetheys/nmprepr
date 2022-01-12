@@ -215,6 +215,7 @@ class MazeGoal(Base):
 
         q[0] = random(min_x, max_x)
         q[1] = random(min_y, max_y)
+        return q
 
     def set_eval(self):
         pass

@@ -145,9 +145,12 @@ class MazeGoal(Base):
           goal_cell = bfs[0]
           init_cell = bfs[i]
           gate = gates[i]
-          print(goal_cell, init_cell, gate)
+          print(bfs, depth_bfs, d_max, gates)
+          print(goal_cell, init_cell, gate, depth)
 
           return maze, goal_cell, init_cell, gate
+        else:
+            return maze, None, None, None
 
     def get_obstacles_geoms(self, idx_env):
         np_random = self._np_random

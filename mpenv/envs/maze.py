@@ -37,8 +37,8 @@ class MazeGoal(Base):
         self.easy = easy
         self.coordinate_jitter = coordinate_jitter
         self.min_gap = min_gap
-        self.distance = init_distance # distance l_infinity from the goal
-        self.depth = depth if self.distance is None else 0 # depth is 0 if we fix the distance
+        self.distance = init_distance # distance from the gate
+        self.depth = depth # depth is 0 if we fix the distance
         self.min_maze_size = min_maze_size
         self.max_maze_size = max_maze_size
 
@@ -364,8 +364,15 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False, min_gap=3*SPHERE
 def maze_edges(grid_size, easy=True, coordinate_jitter=False,
                min_gap=3*SPHERE_2D_DIAMETER, depth=None, distance=None,
                min_maze_size=None, max_maze_size=None,collision_reward=-4):
-    env = MazeGoal(grid_size, easy, coordinate_jitter, min_gap, depth, distance,
-                   min_maze_size, max_maze_size,collision_reward=collision_reward)
+    env = MazeGoal(grid_size=grid_size,
+                  easy=easy,
+                  coordinate_jitter=coordinate_jitter,
+                  min_gap=min_gap,
+                  depth=depth,
+                  init_distance=distance,
+                  min_maze_size = min_maze_size,
+                  max_maze_size=max_maze_size,
+                  collision_reward=collision_reward)
     env = MazeObserver(env)
     coordinate_frame = "local"
     env = RobotLinksObserver(env, coordinate_frame)

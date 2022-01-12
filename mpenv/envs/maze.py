@@ -90,7 +90,7 @@ class MazeGoal(Base):
 
                 if self.distance is not None:
                     print(self.gate)
-                    q_state = self.get_random_state_near_goal(q_goal[:2], self.distance, self.goal_cell, self.gate)
+                    q_state = self.get_random_state_near_goal(self.init_cell, self.distance, self.gate)
                 else:
                     q_state = self.get_random_state_cell(self.init_cell)
 
@@ -179,9 +179,7 @@ class MazeGoal(Base):
       q[1] = random(min_y, max_y)
       return q
 
-    def get_random_state_near_goal(self, goal_pos, distance, goal_cell, gate):
-        goal_x, goal_y = goal_pos[0], goal_pos[1]
-
+    def get_random_state_near_goal(self, cell, distance, gate):
         delta = self.thickness + SPHERE_2D_RADIUS + .005
         q = np.zeros(7)
         q[-1] = 1.

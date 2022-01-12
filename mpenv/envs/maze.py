@@ -179,8 +179,6 @@ class MazeGoal(Base):
     def get_random_state_near_goal(self, cell, distance, gate):
         q = np.zeros(7)
         q[-1] = 1.
-
-        print(gate)
         if gate == 'N':
             min_x = self.subdiv_x[cell.x  ]
             max_x = self.subdiv_x[cell.x+1]

@@ -201,7 +201,7 @@ class MazeGoal(Base):
             max_x = min(self.subdiv_x[cell.x+1] - delta,
                         self.subdiv_x[cell.x  ] + delta + distance)
 
-            min_y = self.subdiv_y[cell.y  ] + delta,
+            min_y = self.subdiv_y[cell.y  ] + delta
             max_y = self.subdiv_y[cell.y+1] - delta
         elif gate == 'E':
             min_x = max(self.subdiv_x[cell.x  ] + delta,

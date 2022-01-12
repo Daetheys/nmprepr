@@ -177,39 +177,38 @@ class MazeGoal(Base):
       return q
 
     def get_random_state_near_goal(self, cell, distance, gate):
-        delta = self.thickness + SPHERE_2D_RADIUS + .005
         q = np.zeros(7)
         q[-1] = 1.
 
         print(gate)
         if gate == 'N':
-            min_x = self.subdiv_x[cell.x  ] + delta
-            max_x = self.subdiv_x[cell.x+1] - delta
+            min_x = self.subdiv_x[cell.x  ]
+            max_x = self.subdiv_x[cell.x+1]
 
-            min_y = self.subdiv_y[cell.y  ] + delta
-            max_y = min(self.subdiv_y[cell.y+1] - delta,
-                        self.subdiv_y[cell.y  ] + delta + distance)
+            min_y = self.subdiv_y[cell.y  ]
+            max_y = min(self.subdiv_y[cell.y+1],
+                        self.subdiv_y[cell.y  ] + distance)
         elif gate == 'S':
-            min_x = self.subdiv_x[cell.x  ] + delta
-            max_x = self.subdiv_x[cell.x+1] - delta
+            min_x = self.subdiv_x[cell.x  ]
+            max_x = self.subdiv_x[cell.x+1]
 
-            min_y = max(self.subdiv_y[cell.y  ] + delta,
-                        self.subdiv_y[cell.y+1] - delta - distance)
-            max_y = self.subdiv_y[cell.y+1] - delta
+            min_y = max(self.subdiv_y[cell.y  ],
+                        self.subdiv_y[cell.y+1] - distance)
+            max_y = self.subdiv_y[cell.y+1]
         elif gate == 'W':
-            min_x = self.subdiv_x[cell.x  ] + delta
-            max_x = min(self.subdiv_x[cell.x+1] - delta,
-                        self.subdiv_x[cell.x  ] + delta + distance)
+            min_x = self.subdiv_x[cell.x  ]
+            max_x = min(self.subdiv_x[cell.x+1],
+                        self.subdiv_x[cell.x  ] + distance)
 
-            min_y = self.subdiv_y[cell.y  ] + delta
-            max_y = self.subdiv_y[cell.y+1] - delta
+            min_y = self.subdiv_y[cell.y  ]
+            max_y = self.subdiv_y[cell.y+1]
         elif gate == 'E':
-            min_x = max(self.subdiv_x[cell.x  ] + delta,
-                        self.subdiv_x[cell.x+1] - delta - distance)
-            max_x = self.subdiv_x[cell.x+1] - delta
+            min_x = max(self.subdiv_x[cell.x  ],
+                        self.subdiv_x[cell.x+1] - distance)
+            max_x = self.subdiv_x[cell.x+1]
 
-            min_y = self.subdiv_y[cell.y  ] + delta,
-            max_y = self.subdiv_y[cell.y+1] - delta
+            min_y = self.subdiv_y[cell.y  ],
+            max_y = self.subdiv_y[cell.y+1]
         else:
             raise ValueError('No gates when depth is 0')
 

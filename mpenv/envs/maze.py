@@ -145,7 +145,7 @@ class MazeGoal(Base):
           goal_cell = bfs[0]
           init_cell = bfs[i]
           gate = gates[i]
-          print(bfs, depth_bfs, d_max, gates)
+          print(bfs, depth_list, d_max, gates)
           print(goal_cell, init_cell, gate, depth)
 
           return maze, goal_cell, init_cell, gate

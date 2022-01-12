@@ -219,6 +219,8 @@ class MazeGoal(Base):
         print(q[0], q[1])
         print('x', self.subdiv_x[cell.x], self.subdiv_x[cell.x+1])
         print('y', self.subdiv_y[cell.y], self.subdiv_y[cell.y+1])
+        print('min_x', min_x, max_x)
+        print('max_y', min_y, max_y)
         return q
 
     def set_eval(self):

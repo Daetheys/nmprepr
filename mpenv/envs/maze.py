@@ -149,7 +149,7 @@ class MazeGoal(Base):
 
     def get_obstacles_geoms(self, idx_env):
         np_random = self._np_random
-        geom_objs, subdiv_x, subdiv_y = extract_obstacles(maze, self.thickness, self.coordinate_jitter, self.min_gap)
+        geom_objs, subdiv_x, subdiv_y = extract_obstacles(self.maze, self.thickness, self.coordinate_jitter, self.min_gap)
         geoms = Geometries(geom_objs)
         return geoms, idx_env, subdiv_x, subdiv_y
 
@@ -174,7 +174,7 @@ class MazeGoal(Base):
       q[1] = random(min_y, max_y)
       return q
 
-    def get_random_state_near_goal(self, goal_pos, max_distance, goal_cell, gate):
+    def get_random_state_near_goal(self, goal_pos, distance, goal_cell, gate):
         goal_x, goal_y = goal_pos[0], goal_pos[1]
 
         delta = self.thickness + SPHERE_2D_RADIUS + .005

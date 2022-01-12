@@ -89,7 +89,6 @@ class MazeGoal(Base):
                 self.set_goal_state(q_goal)
 
                 if self.distance is not None:
-                    print(self.gate)
                     q_state = self.get_random_state_near_goal(self.init_cell, self.distance, self.gate)
                 else:
                     q_state = self.get_random_state_cell(self.init_cell)
@@ -145,8 +144,6 @@ class MazeGoal(Base):
           goal_cell = bfs[0]
           init_cell = bfs[i]
           gate = gates[i]
-          print(bfs, depth_list, d_max, gates)
-          print(goal_cell, init_cell, gate, self.depth)
 
           return maze, goal_cell, init_cell, gate
         else:

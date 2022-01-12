@@ -207,7 +207,7 @@ class MazeGoal(Base):
                         self.subdiv_x[cell.x+1] - distance)
             max_x = self.subdiv_x[cell.x+1]
 
-            min_y = self.subdiv_y[cell.y  ],
+            min_y = self.subdiv_y[cell.y  ]
             max_y = self.subdiv_y[cell.y+1]
         else:
             raise ValueError('No gates when depth is 0')
@@ -215,12 +215,6 @@ class MazeGoal(Base):
 
         q[0] = random(min_x, max_x)
         q[1] = random(min_y, max_y)
-        print(q[0], q[1])
-        print('x', self.subdiv_x[cell.x], self.subdiv_x[cell.x+1])
-        print('y', self.subdiv_y[cell.y], self.subdiv_y[cell.y+1])
-        print('min_x', min_x, max_x)
-        print('max_y', min_y, max_y)
-        return q
 
     def set_eval(self):
         pass

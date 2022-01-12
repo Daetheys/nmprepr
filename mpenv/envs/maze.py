@@ -181,6 +181,7 @@ class MazeGoal(Base):
         q = np.zeros(7)
         q[-1] = 1.
 
+        print(gate)
         if gate == 'N':
             min_x = self.subdiv_x[cell.x  ] + delta
             max_x = self.subdiv_x[cell.x+1] - delta
@@ -215,6 +216,7 @@ class MazeGoal(Base):
 
         q[0] = random(min_x, max_x)
         q[1] = random(min_y, max_y)
+        print(q[0], q[1]])
         return q
 
     def set_eval(self):

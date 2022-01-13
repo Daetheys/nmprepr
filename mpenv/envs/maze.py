@@ -27,7 +27,7 @@ from mpenv.envs.cst import SPHERE_2D_DIAMETER, SPHERE_2D_RADIUS
 
 class MazeGoal(Base):
     def __init__(self, grid_size, easy=False, coordinate_jitter=False,
-                 min_gap=3*SPHERE_2D_DIAMETER, depth=None, init_distance=None,
+                 min_gap=3*SPHERE_2D_DIAMETER, depth_specified=False, depth_min=0, depth_max=0, init_distance=None,
                  min_maze_size = None, max_maze_size=None,collision_reward=-4):
         super().__init__(robot_name="sphere")
 
@@ -38,7 +38,9 @@ class MazeGoal(Base):
         self.coordinate_jitter = coordinate_jitter
         self.min_gap = min_gap
         self.distance = init_distance # distance from the gate
-        self.depth = depth # depth is 0 if we fix the distance
+        self.depth_specified = depth # depth is 0 if we fix the distance
+        self.depth_min = depth_min
+        self.depth_max = depth_max
         self.min_maze_size = min_maze_size
         self.max_maze_size = max_maze_size
 
@@ -63,10 +65,14 @@ class MazeGoal(Base):
     def _reset(self, idx_env=None, start=None, goal=None):
         model_wrapper = self.model_wrapper
         self.robot = self.add_robot("sphere2d", self.freeflyer_bounds)
+
         if self.max_maze_size is not None:
-          self.grid_size = np.random.randint(1 if self.min_maze_size is None else self.min_maze_size,
+          self.grid_size = np.random.randint(self.min_maze_size,
                                              self.max_maze_size + 1)
-        self.maze, self.goal_cell, self.init_cell, self.gate = self.make_maze()
+
+        depth = None if not self.depth_specified else np.random.randint(self.depth_min, self.depth_max+1)
+        self.maze, self.goal_cell, self.init_cell, self.gate = self.make_maze(depth)
+
         self.geoms, self.idx_env, self.subdiv_x, self.subdiv_y = self.get_obstacles_geoms(idx_env)
         for geom_obj in self.geoms.geom_objs:
             self.add_obstacle(geom_obj, static=True)
@@ -123,22 +129,22 @@ class MazeGoal(Base):
         _, collide = self.stopping_configuration(straight_path)
         return not(collide.any())
 
-    def make_maze(self):
+    def make_maze(self, depth):
         maze = Maze(self.grid_size, self.grid_size)
         maze.make_maze()
 
-        if self.depth is not None:
+        if depth is not None:
           x0, y0 = np.random.randint(maze.nx), np.random.randint(maze.ny)
           bfs, depth_list, d_max, gates = maze.depth_bfs(x0,y0)
 
-          while d_max < self.depth:
+          while d_max < depth:
             maze = Maze(self.grid_size, self.grid_size)
             maze.make_maze()
             x0, y0 = np.random.randint(maze.nx), np.random.randint(maze.ny)
             bfs, depth_list, d_max, gates = maze.depth_bfs(x0,y0)
 
           depth_list = np.array(depth_list) # to make it easier
-          idx = np.where(depth_list == self.depth)[0]
+          idx = np.where(depth_list == depth)[0]
           i = np.random.choice(idx)
 
           goal_cell = bfs[0]
@@ -356,7 +362,8 @@ def extract_obstacles(maze, thickness, coordinate_jitter=False, min_gap=3*SPHERE
 
 def maze_edges(grid_size, easy=True, coordinate_jitter=False,
                min_gap=3*SPHERE_2D_DIAMETER, depth=None, distance=None,
-               min_maze_size=None, max_maze_size=None,collision_reward=-4):
+               min_maze_size=None, max_maze_size=None,collision_reward=-4,
+               depth_specified=False, depth_min=0, depth_max=0):
     env = MazeGoal(grid_size=grid_size,
                   easy=easy,
                   coordinate_jitter=coordinate_jitter,
@@ -365,7 +372,10 @@ def maze_edges(grid_size, easy=True, coordinate_jitter=False,
                   init_distance=distance,
                   min_maze_size = min_maze_size,
                   max_maze_size=max_maze_size,
-                  collision_reward=collision_reward)
+                  collision_reward=collision_reward,
+                  depth_specified=depth_specified,
+                  depth_min=depth_min,
+                  depth_max=depth_max)
     env = MazeObserver(env)
     coordinate_frame = "local"
     env = RobotLinksObserver(env, coordinate_frame)

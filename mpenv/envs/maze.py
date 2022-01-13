@@ -38,7 +38,7 @@ class MazeGoal(Base):
         self.coordinate_jitter = coordinate_jitter
         self.min_gap = min_gap
         self.distance = init_distance # distance from the gate
-        self.depth_specified = depth # depth is 0 if we fix the distance
+        self.depth_specified = depth_specified # depth is 0 if we fix the distance
         self.depth_min = depth_min
         self.depth_max = depth_max
         self.min_maze_size = min_maze_size

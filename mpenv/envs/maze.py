@@ -214,7 +214,11 @@ class MazeGoal(Base):
             min_y = self.subdiv_y[cell.y  ]
             max_y = self.subdiv_y[cell.y+1]
         else:
-            raise ValueError('No gates when depth is 0')
+            min_x = self.subdiv_x[cell.x  ]
+            max_x = self.subdiv_x[cell.x+1]
+
+            min_y = self.subdiv_y[cell.y  ]
+            max_y = self.subdiv_y[cell.y+1]
 
 
         q[0] = random(min_x, max_x)

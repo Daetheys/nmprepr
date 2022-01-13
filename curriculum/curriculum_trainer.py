@@ -40,7 +40,9 @@ class CurriculumTrainer:
                  alpha=None,
                  reward_scale=1.,
                  load_replay_buffer_file = None,
-                 save_replay= True
+                 save_replay= True,
+                 archi = 'pointnet',
+                 seed = 0
                  ):
         self.mazes = mazes
 
@@ -52,10 +54,10 @@ class CurriculumTrainer:
 
         self.args = dict(env_name=self.mazes[0],
                     exp_dir='maze_baseline',
-                    seed=0,
+                    seed=seed,
                     resume=False if filename_net is None else filename_net,
                     mode="her",
-                    archi="pointnet",
+                    archi=archi,
                     epochs=0,
                     reward_scale=reward_scale,
                     hidden_dim=hidden_dim,

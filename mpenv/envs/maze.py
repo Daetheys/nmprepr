@@ -78,7 +78,7 @@ class MazeGoal(Base):
             self.add_obstacle(geom_obj, static=True)
         model_wrapper.create_data()
 
-        if self.depth is None:
+        if not self.depth_specified:
             straight_path = True
             while straight_path:
                 self.goal_state = self.random_configuration()

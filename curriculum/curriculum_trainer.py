@@ -42,7 +42,8 @@ class CurriculumTrainer:
                  load_replay_buffer_file = None,
                  save_replay= True,
                  archi = 'pointnet',
-                 seed = 0
+                 seed = 0,
+                 timeout_threshold=50
                  ):
         self.mazes = mazes
 
@@ -89,6 +90,8 @@ class CurriculumTrainer:
         self.save_replay = save_replay
 
         self.n_viz_path = n_viz_path
+        
+        self.timeout_threshold = timeout_threshold
 
     def load(self, file):
         self.args['resume'] = file
@@ -102,7 +105,9 @@ class CurriculumTrainer:
             self.mazetrainer.change_env(m)
             c = 0
             count_next = 0
-
+            
+            timeout = 0
+            
             while True:
                 with HideOut():
                     self.mazetrainer.set_dir(m, c + 1)
@@ -138,9 +143,13 @@ class CurriculumTrainer:
                     visualization_env.close()
                     del visualization_env
                     gc.collect()
+                timeout += 1
                 if score >= self.threshold:
                     count_next += 1
                     if count_next >= self.count_next_threshold:
                         break
                 else:
                     count_next = 0
+                if timeout > self.timeout_threshold:
+                    print('Timed Out')
+                    break

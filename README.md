@@ -1,4 +1,4 @@
-#RecVis curriculum & Flow
+# RecVis curriculum & Flow
 To launch the code upload the notebook in colab and run it. It might take a while to run as you should find curriculum trainings and fluid experiment in the same notebook. Moreover you may have RAM issues if you don't have colab pro.
 
 # Learning Obstacle Representations for Neural Motion Planning
